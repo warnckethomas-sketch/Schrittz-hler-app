@@ -89,6 +89,22 @@ class StepViewModel(private val repository: StepRepository) : ViewModel() {
     private val _alarmMinute = MutableStateFlow(repository.getAlarmMinute())
     val alarmMinute: StateFlow<Int> = _alarmMinute.asStateFlow()
 
+    private val _themeVibe = MutableStateFlow(repository.getThemeVibe())
+    val themeVibe: StateFlow<String> = _themeVibe.asStateFlow()
+
+    private val _themeMode = MutableStateFlow(repository.getThemeMode())
+    val themeMode: StateFlow<String> = _themeMode.asStateFlow()
+
+    fun setThemeVibe(vibe: String) {
+        _themeVibe.value = vibe
+        repository.setThemeVibe(vibe)
+    }
+
+    fun setThemeMode(mode: String) {
+        _themeMode.value = mode
+        repository.setThemeMode(mode)
+    }
+
     fun setAlarmEnabled(enabled: Boolean) {
         _alarmEnabled.value = enabled
         repository.setAlarmEnabled(enabled)

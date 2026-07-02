@@ -23,7 +23,21 @@ class PreferencesManager(context: Context) {
         private const val KEY_ALARM_ENABLED = "pref_alarm_enabled"
         private const val KEY_ALARM_HOUR = "pref_alarm_hour"
         private const val KEY_ALARM_MINUTE = "pref_alarm_minute"
+        private const val KEY_THEME_VIBE = "pref_theme_vibe"
+        private const val KEY_THEME_MODE = "pref_theme_mode"
     }
+
+    var themeVibe: String
+        get() = sharedPreferences.getString(KEY_THEME_VIBE, "standard") ?: "standard"
+        set(value) {
+            sharedPreferences.edit().putString(KEY_THEME_VIBE, value).apply()
+        }
+
+    var themeMode: String
+        get() = sharedPreferences.getString(KEY_THEME_MODE, "auto") ?: "auto"
+        set(value) {
+            sharedPreferences.edit().putString(KEY_THEME_MODE, value).apply()
+        }
 
     var alarmEnabled: Boolean
         get() = sharedPreferences.getBoolean(KEY_ALARM_ENABLED, false)

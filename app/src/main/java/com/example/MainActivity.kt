@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModelProvider
 import com.example.data.PreferencesManager
 import com.example.data.StepDatabase
@@ -32,13 +34,17 @@ class MainActivity : ComponentActivity() {
         
         enableEdgeToEdge()
         setContent {
-            MyApplicationTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    StepTrackerDashboard(
-                        viewModel = viewModel,
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+            val themeVibe by viewModel.themeVibe.collectAsState()
+            val themeMode by viewModel.themeMode.collectAsState()
+
+            MyApplicationTheme(
+                themeVibe = themeVibe,
+                themeMode = themeMode
+            ) {
+                StepTrackerDashboard(
+                    viewModel = viewModel,
+                    modifier = Modifier.fillMaxSize()
+                )
             }
         }
     }

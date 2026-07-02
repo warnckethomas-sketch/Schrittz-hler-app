@@ -96,6 +96,10 @@ fun StepTrackerDashboard(
     var dialogInitialSteps by remember { mutableStateOf("") }
     var dialogInitialRemark by remember { mutableStateOf("") }
     var showStepLengthConfig by remember { mutableStateOf(false) }
+    var isPersonConfigExpanded by remember { mutableStateOf(false) }
+    var isAlarmConfigExpanded by remember { mutableStateOf(false) }
+    var isBackupConfigExpanded by remember { mutableStateOf(false) }
+    var isThemeConfigExpanded by remember { mutableStateOf(false) }
     var showExitConfirmationDialog by remember { mutableStateOf(false) }
     var showPersonDropdown by remember { mutableStateOf(false) }
     var showPrintPersonDialog by remember { mutableStateOf(false) }
@@ -182,13 +186,13 @@ fun StepTrackerDashboard(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
-        containerColor = Color(0xFFFEF7FF), // Exact High Density background
+        containerColor = MaterialTheme.colorScheme.background, // Dynamic High Density background
         topBar = {
             // High Density Premium Custom Header in place of a standard top bar
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color(0xFFFEF7FF))
+                    .background(MaterialTheme.colorScheme.background)
                     .statusBarsPadding()
                     .padding(horizontal = 24.dp, vertical = 12.dp)
             ) {
@@ -196,7 +200,7 @@ fun StepTrackerDashboard(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFFECE6F0) // Sleek Material 3 Surface Color
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant // Dynamic Surface Color
                     ),
                     shape = RoundedCornerShape(14.dp)
                 ) {
@@ -212,18 +216,18 @@ fun StepTrackerDashboard(
                             fontWeight = FontWeight.Bold,
                             fontSize = 24.sp,
                             letterSpacing = (-0.5).sp,
-                            color = Color(0xFF1D1B20)
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Icon(
                             imageVector = if (showStepLengthConfig) Icons.Default.Settings else if (activeTab == 0) Icons.Default.DirectionsRun else Icons.Default.History,
                             contentDescription = null,
-                            tint = Color(0xFF6750A4),
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(24.dp)
                         )
                         Text(
                             text = if (showStepLengthConfig) "Konfiguration & Sicherung" else if (activeTab == 0) "Erfassung & Auswertung" else "Verlauf & Sicherung",
                             fontSize = 12.sp,
-                            color = Color(0xFF49454F),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontWeight = FontWeight.SemiBold,
                             textAlign = TextAlign.Center
                         )
@@ -251,12 +255,12 @@ fun StepTrackerDashboard(
                                     .size(40.dp)
                                     .testTag("tab_dashboard")
                                     .clip(CircleShape)
-                                    .background(if (activeTab == 0) Color(0xFFE8DEF8) else Color.Transparent)
+                                    .background(if (activeTab == 0) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Home,
                                     contentDescription = "Dashboard",
-                                    tint = if (activeTab == 0) Color(0xFF21005D) else Color(0xFF49454F),
+                                    tint = if (activeTab == 0) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(22.dp)
                                 )
                             }
@@ -268,12 +272,12 @@ fun StepTrackerDashboard(
                                     .size(40.dp)
                                     .testTag("tab_history")
                                     .clip(CircleShape)
-                                    .background(if (activeTab == 1) Color(0xFFE8DEF8) else Color.Transparent)
+                                    .background(if (activeTab == 1) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.History,
                                     contentDescription = "Historie",
-                                    tint = if (activeTab == 1) Color(0xFF21005D) else Color(0xFF49454F),
+                                    tint = if (activeTab == 1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(22.dp)
                                 )
                             }
@@ -289,7 +293,7 @@ fun StepTrackerDashboard(
                                 Icon(
                                     imageVector = Icons.Default.ArrowBack,
                                     contentDescription = "Zurück",
-                                    tint = Color(0xFF49454F),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(22.dp)
                                 )
                             }
@@ -312,12 +316,12 @@ fun StepTrackerDashboard(
                                 .size(40.dp)
                                 .testTag("settings_gear_button")
                                 .clip(CircleShape)
-                                .background(if (showStepLengthConfig) Color(0xFFE8DEF8) else Color.Transparent)
+                                .background(if (showStepLengthConfig) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Settings,
                                 contentDescription = "Einstellungen",
-                                tint = if (showStepLengthConfig) Color(0xFF21005D) else Color(0xFF49454F),
+                                tint = if (showStepLengthConfig) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(22.dp)
                             )
                         }
@@ -335,7 +339,7 @@ fun StepTrackerDashboard(
                             Icon(
                                 imageVector = Icons.Default.Print,
                                 contentDescription = "Monatliche Zusammenfassung drucken",
-                                tint = Color(0xFF49454F),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(22.dp)
                             )
                         }
@@ -348,12 +352,12 @@ fun StepTrackerDashboard(
                                     .size(40.dp)
                                     .testTag("appbar_person_select_button")
                                     .clip(CircleShape)
-                                    .background(if (showPersonDropdown) Color(0xFFE8DEF8) else Color.Transparent)
+                                    .background(if (showPersonDropdown) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.Person,
                                     contentDescription = "Benutzer wechseln",
-                                    tint = if (showPersonDropdown) Color(0xFF21005D) else Color(0xFF6750A4),
+                                    tint = if (showPersonDropdown) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(22.dp)
                                 )
                             }
@@ -362,8 +366,8 @@ fun StepTrackerDashboard(
                                 expanded = showPersonDropdown,
                                 onDismissRequest = { showPersonDropdown = false },
                                 modifier = Modifier
-                                    .background(Color(0xFFFEF7FF))
-                                    .border(1.dp, Color(0xFFCAC4D0).copy(alpha = 0.5f), RoundedCornerShape(12.dp))
+                                    .background(MaterialTheme.colorScheme.surface)
+                                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
                             ) {
                                 val isP1 = selectedPerson == "person_1"
                                 DropdownMenuItem(
@@ -375,13 +379,13 @@ fun StepTrackerDashboard(
                                             Icon(
                                                 imageVector = if (isP1) Icons.Default.CheckCircle else Icons.Default.Person,
                                                 contentDescription = null,
-                                                tint = if (isP1) Color(0xFF6750A4) else Color(0xFF49454F),
+                                                tint = if (isP1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                                                 modifier = Modifier.size(18.dp)
                                             )
                                             Text(
                                                 text = person1Name,
                                                 fontWeight = if (isP1) FontWeight.Bold else FontWeight.Medium,
-                                                color = if (isP1) Color(0xFF21005D) else Color(0xFF191C1E),
+                                                color = if (isP1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
                                                 fontSize = 14.sp
                                             )
                                         }
@@ -403,13 +407,13 @@ fun StepTrackerDashboard(
                                             Icon(
                                                 imageVector = if (isP2) Icons.Default.CheckCircle else Icons.Default.Person,
                                                 contentDescription = null,
-                                                tint = if (isP2) Color(0xFF6750A4) else Color(0xFF49454F),
+                                                tint = if (isP2) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                                                 modifier = Modifier.size(18.dp)
                                             )
                                             Text(
                                                 text = person2Name,
                                                 fontWeight = if (isP2) FontWeight.Bold else FontWeight.Medium,
-                                                color = if (isP2) Color(0xFF21005D) else Color(0xFF191C1E),
+                                                color = if (isP2) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
                                                 fontSize = 14.sp
                                             )
                                         }
@@ -436,7 +440,7 @@ fun StepTrackerDashboard(
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ExitToApp,
                                 contentDescription = "App beenden",
-                                tint = Color(0xFF49454F),
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.size(22.dp)
                             )
                         }
@@ -446,14 +450,14 @@ fun StepTrackerDashboard(
                         Surface(
                             modifier = Modifier.size(38.dp),
                             shape = CircleShape,
-                            color = Color(0xFFEADDFF),
-                            border = BorderStroke(1.dp, Color(0xFFCAC4D0))
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
                         ) {
                             Box(contentAlignment = Alignment.Center) {
                                 Text(
                                     text = "TW", // Thomas Warncke
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF21005D),
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                                     fontSize = 13.sp,
                                     letterSpacing = 0.sp
                                 )
@@ -468,7 +472,7 @@ fun StepTrackerDashboard(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(
-                            containerColor = Color(0xFFF3EDF7)
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
                         ),
                         shape = RoundedCornerShape(12.dp)
                     ) {
@@ -482,13 +486,13 @@ fun StepTrackerDashboard(
                             Icon(
                                 imageVector = Icons.Default.CloudDone,
                                 contentDescription = "Sicherung erfolgreich",
-                                tint = Color(0xFF6750A4),
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(16.dp)
                             )
                             Text(
                                 text = "Letzte Sicherung: $lastBackupTime",
                                 fontSize = 11.sp,
-                                color = Color(0xFF6750A4),
+                                color = MaterialTheme.colorScheme.primary,
                                 fontWeight = FontWeight.Medium
                             )
                         }
@@ -504,7 +508,7 @@ fun StepTrackerDashboard(
                 .padding(top = innerPadding.calculateTopPadding())
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(bottom = 96.dp)
+            contentPadding = PaddingValues(bottom = innerPadding.calculateBottomPadding() + 96.dp)
         ) {
             // SETTINGS & BACKUP AREA (shown when gear/settings is toggled)
             if (showStepLengthConfig) {
@@ -515,6 +519,19 @@ fun StepTrackerDashboard(
                             .padding(bottom = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
+                        ThemeSettingsCard(
+                            viewModel = viewModel,
+                            isExpanded = isThemeConfigExpanded,
+                            onToggle = {
+                                isThemeConfigExpanded = !isThemeConfigExpanded
+                                if (isThemeConfigExpanded) {
+                                    isPersonConfigExpanded = false
+                                    isAlarmConfigExpanded = false
+                                    isBackupConfigExpanded = false
+                                }
+                            }
+                        )
+
                         PersonSettingsCard(
                             person1Name = person1Name,
                             onPerson1NameChanged = { viewModel.updatePerson1Name(it) },
@@ -523,15 +540,42 @@ fun StepTrackerDashboard(
                             person2Name = person2Name,
                             onPerson2NameChanged = { viewModel.updatePerson2Name(it) },
                             stepLengthCmPerson2 = stepLengthCmPerson2,
-                            onStepLengthCmPerson2Changed = { viewModel.updateStepLengthPerson2(it) }
+                            onStepLengthCmPerson2Changed = { viewModel.updateStepLengthPerson2(it) },
+                            isExpanded = isPersonConfigExpanded,
+                            onToggle = {
+                                isPersonConfigExpanded = !isPersonConfigExpanded
+                                if (isPersonConfigExpanded) {
+                                    isThemeConfigExpanded = false
+                                    isAlarmConfigExpanded = false
+                                    isBackupConfigExpanded = false
+                                }
+                            }
                         )
 
                         AlarmSettingsCard(
-                            viewModel = viewModel
+                            viewModel = viewModel,
+                            isExpanded = isAlarmConfigExpanded,
+                            onToggle = {
+                                isAlarmConfigExpanded = !isAlarmConfigExpanded
+                                if (isAlarmConfigExpanded) {
+                                    isThemeConfigExpanded = false
+                                    isPersonConfigExpanded = false
+                                    isBackupConfigExpanded = false
+                                }
+                            }
                         )
 
                         LocalBackupCard(
-                            viewModel = viewModel
+                            viewModel = viewModel,
+                            isExpanded = isBackupConfigExpanded,
+                            onToggle = {
+                                isBackupConfigExpanded = !isBackupConfigExpanded
+                                if (isBackupConfigExpanded) {
+                                    isThemeConfigExpanded = false
+                                    isPersonConfigExpanded = false
+                                    isAlarmConfigExpanded = false
+                                }
+                            }
                         )
                     }
                 }
@@ -540,8 +584,8 @@ fun StepTrackerDashboard(
 
             // TODAY LOGGING CTA CARD: Gorgeous banner styled dynamically based on active person's today entry
             item {
-                val cardBg = if (hasTodayEntry) Color(0xFFEADDFF) else Color(0xFFF3EDF7)
-                val cardBorderColor = if (hasTodayEntry) Color(0xFFCAC4D0).copy(alpha = 0.5f) else Color(0xFF6750A4).copy(alpha = 0.5f)
+                val cardBg = if (hasTodayEntry) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
+                val cardBorderColor = if (hasTodayEntry) MaterialTheme.colorScheme.outline.copy(alpha = 0.5f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
                 val cardBorderWidth = if (hasTodayEntry) 1.dp else 1.5.dp
 
                 Card(
@@ -571,7 +615,7 @@ fun StepTrackerDashboard(
                                     text = if (hasTodayEntry) "SCHRITTVERLAUF HEUTE AKTUELL" else "SCHRITTVERLAUF SCHNELL ERFASSEN",
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF21005D),
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
                                     letterSpacing = 1.sp
                                 )
                                 if (hasTodayEntry) {
@@ -583,21 +627,21 @@ fun StepTrackerDashboard(
                                     ) {
                                         Box(
                                             modifier = Modifier
-                                                .background(Color.White, shape = RoundedCornerShape(8.dp))
-                                                .border(BorderStroke(1.dp, Color(0xFFCAC4D0).copy(alpha = 0.5f)), shape = RoundedCornerShape(8.dp))
+                                                .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(8.dp))
+                                                .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)), shape = RoundedCornerShape(8.dp))
                                                 .padding(horizontal = 8.dp, vertical = 2.dp)
                                         ) {
                                             Text(
                                                 text = activePersonLabel,
                                                 fontSize = 11.sp,
                                                 fontWeight = FontWeight.Bold,
-                                                color = Color(0xFF6750A4)
+                                                color = MaterialTheme.colorScheme.primary
                                             )
                                         }
                                         Text(
                                             text = "hat heute bereits $todaySteps Schritte!",
                                             fontSize = 13.sp,
-                                            color = Color(0xFF49454F),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             fontWeight = FontWeight.Medium
                                         )
                                     }
@@ -609,21 +653,21 @@ fun StepTrackerDashboard(
                                     ) {
                                         Box(
                                             modifier = Modifier
-                                                .background(Color.White, shape = RoundedCornerShape(8.dp))
-                                                .border(BorderStroke(1.dp, Color(0xFFCAC4D0).copy(alpha = 0.5f)), shape = RoundedCornerShape(8.dp))
+                                                .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(8.dp))
+                                                .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)), shape = RoundedCornerShape(8.dp))
                                                 .padding(horizontal = 8.dp, vertical = 2.dp)
                                         ) {
                                             Text(
                                                 text = activePersonLabel,
                                                 fontSize = 11.sp,
                                                 fontWeight = FontWeight.Bold,
-                                                color = Color(0xFF6750A4)
+                                                color = MaterialTheme.colorScheme.primary
                                             )
                                         }
                                         Text(
                                             text = "Heute fehlen noch Einträge.",
                                             fontSize = 13.sp,
-                                            color = Color(0xFF49454F),
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                                             fontWeight = FontWeight.Medium
                                         )
                                     }
@@ -633,7 +677,7 @@ fun StepTrackerDashboard(
                             // CTA Button with steps image as requested
                             Surface(
                                 shape = RoundedCornerShape(16.dp),
-                                color = Color(0xFF6750A4),
+                                color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier
                                     .height(38.dp)
                                     .clickable {
@@ -677,7 +721,7 @@ fun StepTrackerDashboard(
                                 text = "Eintragen:",
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF49454F),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(end = 4.dp)
                             )
                             val presets = if (hasTodayEntry) {
@@ -688,8 +732,8 @@ fun StepTrackerDashboard(
                             presets.forEach { (amount, textStr) ->
                                 Surface(
                                     shape = RoundedCornerShape(8.dp),
-                                    color = Color.White,
-                                    border = BorderStroke(1.dp, Color(0xFF6750A4).copy(alpha = 0.3f)),
+                                    color = MaterialTheme.colorScheme.surface,
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)),
                                     modifier = Modifier
                                         .weight(1f)
                                         .height(32.dp)
@@ -700,7 +744,7 @@ fun StepTrackerDashboard(
                                     Box(contentAlignment = Alignment.Center) {
                                         Text(
                                             text = textStr,
-                                            color = Color(0xFF6750A4),
+                                            color = MaterialTheme.colorScheme.primary,
                                             fontSize = 11.sp,
                                             fontWeight = FontWeight.Bold
                                         )
@@ -725,7 +769,7 @@ fun StepTrackerDashboard(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Color(0xFFF3EDF7))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
                         .padding(4.dp),
                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
@@ -735,7 +779,7 @@ fun StepTrackerDashboard(
                             modifier = Modifier
                                 .weight(1f)
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(if (isSelected) Color(0xFF6750A4) else Color.Transparent)
+                                .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
                                 .clickable { viewModel.setPeriodType(type) }
                                 .padding(vertical = 10.dp)
                                 .testTag("period_tab_${type.name.lowercase()}"),
@@ -745,7 +789,7 @@ fun StepTrackerDashboard(
                                 text = label,
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = if (isSelected) Color.White else Color(0xFF49454F)
+                                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -778,15 +822,15 @@ fun StepTrackerDashboard(
                 )
             }
 
-            // GRAPHICAL PERIOD BAR CHART (Woche / Monat in custom card: bg-white border border-[#CAC4D0] rounded-3xl)
+            // GRAPHICAL PERIOD BAR CHART (Woche / Monat in custom card: adaptive theme colors)
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.surface
                     ),
                     shape = RoundedCornerShape(28.dp),
-                    border = BorderStroke(1.dp, Color(0xFFCAC4D0)) // High Density specs
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
                 ) {
                     Column(
                         modifier = Modifier.padding(20.dp)
@@ -801,25 +845,25 @@ fun StepTrackerDashboard(
                                     text = "Aktivität",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF1D1B20)
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
                                     text = if (activePeriodType == PeriodType.WEEK) "Wöchentliche Auswertung (Mo - So)" else "Monatliche Auswertung",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = Color(0xFF49454F)
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
 
                         Spacer(modifier = Modifier.height(14.dp))
 
-                        // Inline Person Switcher with dark violet accent border and stylish layout
+                        // Inline Person Switcher with theme-adaptive border and stylish layout
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(Color(0xFFF3EDF7))
-                                .border(BorderStroke(1.5.dp, Color(0xFF4F378B)), RoundedCornerShape(12.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                                .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)), RoundedCornerShape(12.dp))
                                 .padding(4.dp),
                             horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
@@ -829,7 +873,7 @@ fun StepTrackerDashboard(
                                     modifier = Modifier
                                         .weight(1f)
                                         .clip(RoundedCornerShape(8.dp))
-                                        .background(if (isSelected) Color(0xFF4F378B) else Color.Transparent)
+                                        .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
                                         .clickable { viewModel.selectPerson(personId) }
                                         .padding(vertical = 10.dp)
                                         .testTag("activity_chart_person_tab_$personId"),
@@ -842,14 +886,14 @@ fun StepTrackerDashboard(
                                         Icon(
                                             imageVector = if (isSelected) Icons.Default.CheckCircle else Icons.Default.Person,
                                             contentDescription = if (isSelected) "Ausgewählter Benutzer: $name" else "Zu $name wechseln",
-                                            tint = if (isSelected) Color.White else Color(0xFF4F378B),
+                                            tint = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
                                             modifier = Modifier.size(16.dp)
                                         )
                                         Text(
                                             text = name,
                                             style = MaterialTheme.typography.bodyMedium,
                                             fontWeight = FontWeight.Bold,
-                                            color = if (isSelected) Color.White else Color(0xFF4F378B)
+                                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
                                 }
@@ -909,8 +953,8 @@ fun StepTrackerDashboard(
                                     modifier = Modifier
                                         .fillMaxWidth()
                                         .clip(RoundedCornerShape(16.dp))
-                                        .background(Color(0xFFEADDFF).copy(alpha = 0.4f))
-                                        .border(1.dp, Color(0xFFCAC4D0).copy(alpha = 0.6f), RoundedCornerShape(16.dp))
+                                        .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f))
+                                        .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.6f), RoundedCornerShape(16.dp))
                                         .padding(12.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.SpaceBetween
@@ -920,7 +964,7 @@ fun StepTrackerDashboard(
                                             text = "$dayLabelLong, $displayDate",
                                             fontWeight = FontWeight.Bold,
                                             style = MaterialTheme.typography.bodyMedium,
-                                            color = Color(0xFF1D1B20)
+                                            color = MaterialTheme.colorScheme.onSurface
                                         )
                                         Text(
                                             text = if (day.steps > 0) {
@@ -930,7 +974,7 @@ fun StepTrackerDashboard(
                                             },
                                             style = MaterialTheme.typography.bodySmall,
                                             fontWeight = FontWeight.Medium,
-                                            color = Color(0xFF49454F)
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
 
@@ -946,7 +990,7 @@ fun StepTrackerDashboard(
                                             Icon(
                                                 imageVector = Icons.Default.Edit,
                                                 contentDescription = "Schritte bearbeiten",
-                                                tint = Color(0xFF6750A4),
+                                                tint = MaterialTheme.colorScheme.primary,
                                                 modifier = Modifier.size(18.dp)
                                             )
                                         }
@@ -983,20 +1027,20 @@ fun StepTrackerDashboard(
                                     Icon(
                                         imageVector = Icons.Default.DirectionsWalk,
                                         contentDescription = null,
-                                        tint = Color(0xFF6750A4).copy(alpha = 0.4f),
+                                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
                                         modifier = Modifier.size(48.dp)
                                     )
                                     Text(
                                         text = "Kein Schrittverlauf vorhanden",
                                         style = MaterialTheme.typography.titleSmall,
                                         fontWeight = FontWeight.Bold,
-                                        color = Color(0xFF1D1B20),
+                                        color = MaterialTheme.colorScheme.onSurface,
                                         textAlign = TextAlign.Center
                                     )
                                     Text(
                                         text = "Für $activePersonLabel sind bisher noch keine Schritte dokumentiert. Klicke oben auf '+ Schritte', um deinen Verlauf zu starten, oder lade testweise eine Muster-Woche!",
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = Color(0xFF49454F),
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         textAlign = TextAlign.Center,
                                         lineHeight = 16.sp
                                     )
@@ -1004,8 +1048,8 @@ fun StepTrackerDashboard(
                                     Button(
                                         onClick = { viewModel.generateDemoWeekData(context) },
                                         colors = ButtonDefaults.buttonColors(
-                                            containerColor = Color(0xFF6750A4),
-                                            contentColor = Color.White
+                                            containerColor = MaterialTheme.colorScheme.primary,
+                                            contentColor = MaterialTheme.colorScheme.onPrimary
                                         ),
                                         shape = RoundedCornerShape(12.dp),
                                         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
@@ -1033,7 +1077,7 @@ fun StepTrackerDashboard(
                     text = if (activePeriodType == PeriodType.WEEK) "Statistiken (Woche)" else "Statistiken (Monat)",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1D1B20),
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
                 )
             }
@@ -1290,13 +1334,13 @@ fun StepTrackerDashboard(
                 Text(
                     text = "App beenden",
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF21005D)
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             },
             text = {
                 Text(
                     text = "Möchten Sie die App wirklich beenden?",
-                    color = Color(0xFF49454F)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             },
             confirmButton = {
@@ -1306,17 +1350,17 @@ fun StepTrackerDashboard(
                         (context as? Activity)?.finishAndRemoveTask()
                     }
                 ) {
-                    Text("Ja", color = Color(0xFF6750A4), fontWeight = FontWeight.Bold)
+                    Text("Ja", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(
                     onClick = { showExitConfirmationDialog = false }
                 ) {
-                    Text("Nein", color = Color(0xFF49454F))
+                    Text("Nein", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             },
-            containerColor = Color.White,
+            containerColor = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(16.dp)
         )
     }
@@ -1334,13 +1378,13 @@ fun StepTrackerDashboard(
                     Icon(
                         imageVector = Icons.Default.Print,
                         contentDescription = null,
-                        tint = Color(0xFF6750A4),
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(24.dp)
                     )
                     Text(
                         text = "Bericht drucken",
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF21005D),
+                        color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.titleLarge
                     )
                 }
@@ -1351,7 +1395,7 @@ fun StepTrackerDashboard(
                 ) {
                     Text(
                         text = "Wählen Sie aus, für wen der Monatsbericht gedruckt werden soll:",
-                        color = Color(0xFF49454F),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodyMedium
                     )
                     
@@ -1366,11 +1410,11 @@ fun StepTrackerDashboard(
                             .testTag("print_select_person_1"),
                         shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = if (isP1) Color(0xFFF3EDF7) else Color.White
+                            containerColor = if (isP1) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
                         ),
                         border = BorderStroke(
                             width = if (isP1) 2.dp else 1.dp,
-                            color = if (isP1) Color(0xFF6750A4) else Color(0xFFCAC4D0).copy(alpha = 0.6f)
+                            color = if (isP1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
                         )
                     ) {
                         Row(
@@ -1387,21 +1431,21 @@ fun StepTrackerDashboard(
                                 Icon(
                                     imageVector = Icons.Default.Person,
                                     contentDescription = null,
-                                    tint = if (isP1) Color(0xFF6750A4) else Color(0xFF49454F),
+                                    tint = if (isP1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(20.dp)
                                 )
                                 Text(
                                     text = person1Name,
                                     style = MaterialTheme.typography.bodyLarge,
                                     fontWeight = if (isP1) FontWeight.Bold else FontWeight.Normal,
-                                    color = if (isP1) Color(0xFF21005D) else Color(0xFF1D1B20)
+                                    color = if (isP1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
                                 )
                             }
                             if (isP1) {
                                 Icon(
                                     imageVector = Icons.Default.Check,
                                     contentDescription = "Ausgewählt",
-                                    tint = Color(0xFF6750A4),
+                                    tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -1419,11 +1463,11 @@ fun StepTrackerDashboard(
                             .testTag("print_select_person_2"),
                         shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = if (isP2) Color(0xFFF3EDF7) else Color.White
+                            containerColor = if (isP2) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
                         ),
                         border = BorderStroke(
                             width = if (isP2) 2.dp else 1.dp,
-                            color = if (isP2) Color(0xFF6750A4) else Color(0xFFCAC4D0).copy(alpha = 0.6f)
+                            color = if (isP2) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.6f)
                         )
                     ) {
                         Row(
@@ -1440,21 +1484,21 @@ fun StepTrackerDashboard(
                                 Icon(
                                     imageVector = Icons.Default.Person,
                                     contentDescription = null,
-                                    tint = if (isP2) Color(0xFF6750A4) else Color(0xFF49454F),
+                                    tint = if (isP2) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(20.dp)
                                 )
                                 Text(
                                     text = person2Name,
                                     style = MaterialTheme.typography.bodyLarge,
                                     fontWeight = if (isP2) FontWeight.Bold else FontWeight.Normal,
-                                    color = if (isP2) Color(0xFF21005D) else Color(0xFF1D1B20)
+                                    color = if (isP2) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
                                 )
                             }
                             if (isP2) {
                                 Icon(
                                     imageVector = Icons.Default.Check,
                                     contentDescription = "Ausgewählt",
-                                    tint = Color(0xFF6750A4),
+                                    tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(20.dp)
                                 )
                             }
@@ -1470,7 +1514,7 @@ fun StepTrackerDashboard(
                     },
                     modifier = Modifier.testTag("print_confirm_button")
                 ) {
-                    Text("Drucken", color = Color(0xFF6750A4), fontWeight = FontWeight.Bold)
+                    Text("Drucken", color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
@@ -1478,10 +1522,10 @@ fun StepTrackerDashboard(
                     onClick = { showPrintPersonDialog = false },
                     modifier = Modifier.testTag("print_cancel_button")
                 ) {
-                    Text("Abbrechen", color = Color(0xFF49454F))
+                    Text("Abbrechen", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             },
-            containerColor = Color.White,
+            containerColor = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(20.dp)
         )
     }
@@ -1500,9 +1544,9 @@ fun PersonSelectorRow(
             .testTag("person_selector_card"),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF3EDF7)
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
         ),
-        border = BorderStroke(1.dp, Color(0xFFCAC4D0).copy(alpha = 0.5f))
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
     ) {
         Column(
             modifier = Modifier.padding(14.dp),
@@ -1512,7 +1556,7 @@ fun PersonSelectorRow(
                 text = "AKTIVER BENUTZER",
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF6750A4),
+                color = MaterialTheme.colorScheme.primary,
                 letterSpacing = 1.sp
             )
 
@@ -1527,10 +1571,10 @@ fun PersonSelectorRow(
                     modifier = Modifier.weight(1f).height(44.dp).testTag("select_person_1"),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isP1) Color(0xFFEADDFF) else Color.Transparent,
-                        contentColor = if (isP1) Color(0xFF21005D) else Color(0xFF49454F)
+                        containerColor = if (isP1) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+                        contentColor = if (isP1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
                     ),
-                    border = if (isP1) null else BorderStroke(1.dp, Color(0xFFCAC4D0)),
+                    border = if (isP1) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
                     contentPadding = PaddingValues(horizontal = 8.dp)
                 ) {
                     Row(
@@ -1558,10 +1602,10 @@ fun PersonSelectorRow(
                     modifier = Modifier.weight(1f).height(44.dp).testTag("select_person_2"),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isP2) Color(0xFFEADDFF) else Color.Transparent,
-                        contentColor = if (isP2) Color(0xFF21005D) else Color(0xFF49454F)
+                        containerColor = if (isP2) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+                        contentColor = if (isP2) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
                     ),
-                    border = if (isP2) null else BorderStroke(1.dp, Color(0xFFCAC4D0)),
+                    border = if (isP2) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
                     contentPadding = PaddingValues(horizontal = 8.dp)
                 ) {
                     Row(
@@ -1595,7 +1639,9 @@ fun PersonSettingsCard(
     person2Name: String,
     onPerson2NameChanged: (String) -> Unit,
     stepLengthCmPerson2: Int,
-    onStepLengthCmPerson2Changed: (Int) -> Unit
+    onStepLengthCmPerson2Changed: (Int) -> Unit,
+    isExpanded: Boolean,
+    onToggle: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -1603,197 +1649,227 @@ fun PersonSettingsCard(
             .testTag("person_settings_card"),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF3EDF7)
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         ),
-        border = BorderStroke(1.dp, Color(0xFFCAC4D0).copy(alpha = 0.6f))
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Header
+            // Clickable Header
             Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onToggle() },
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                shape = RoundedCornerShape(10.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.People,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    Column {
+                        Text(
+                            text = "Profile & Schrittlängen",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = if (isExpanded) "Namen & Schrittlängen anpassen" else "Personennamen & Schrittlängen einstellen",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
                 Icon(
-                    imageVector = Icons.Default.People,
-                    contentDescription = null,
-                    tint = Color(0xFF6750A4),
+                    imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    contentDescription = if (isExpanded) "Zuklappen" else "Aufklappen",
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
                 )
-                Text(
-                    text = "Profile & Schrittlängen",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1D1B20)
-                )
             }
 
-            Text(
-                text = "Passe die Namen der beiden Personen und deren individuelle Schrittlänge an.",
-                style = MaterialTheme.typography.bodySmall,
-                color = Color(0xFF49454F)
-            )
+            if (isExpanded) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
 
-            HorizontalDivider(color = Color(0xFFCAC4D0).copy(alpha = 0.5f))
-
-            // -- PERSON 1 SECTION --
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Person 1 (Standard)",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF6750A4)
-                    )
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = Color(0xFFEADDFF)
+                // -- PERSON 1 SECTION --
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "$stepLengthCmPerson1 cm",
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                            style = MaterialTheme.typography.labelSmall,
+                            text = "Person 1 (Standard)",
+                            style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF21005D)
+                            color = MaterialTheme.colorScheme.primary
                         )
-                    }
-                }
-
-                OutlinedTextField(
-                    value = person1Name,
-                    onValueChange = onPerson1NameChanged,
-                    label = { Text("Name Person 1") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth().testTag("edit_p1_name"),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color(0xFF1D1B20),
-                        unfocusedTextColor = Color(0xFF1D1B20),
-                        focusedBorderColor = Color(0xFF6750A4),
-                        focusedLabelColor = Color(0xFF6750A4),
-                        unfocusedLabelColor = Color(0xFF49454F),
-                        unfocusedBorderColor = Color(0xFFCAC4D0)
-                    )
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    IconButton(
-                        onClick = { onStepLengthCmPerson1Changed((stepLengthCmPerson1 - 1).coerceAtLeast(30)) },
-                        colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color(0xFFEADDFF)),
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        Icon(imageVector = Icons.Default.Remove, contentDescription = "Verringern", tint = Color(0xFF21005D), modifier = Modifier.size(16.dp))
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.primaryContainer
+                        ) {
+                            Text(
+                                text = "$stepLengthCmPerson1 cm",
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
                     }
 
-                    Slider(
-                        value = stepLengthCmPerson1.toFloat(),
-                        onValueChange = { onStepLengthCmPerson1Changed(it.toInt()) },
-                        valueRange = 30f..150f,
-                        steps = 120,
-                        colors = SliderDefaults.colors(
-                            thumbColor = Color(0xFF6750A4),
-                            activeTrackColor = Color(0xFF6750A4)
-                        ),
-                        modifier = Modifier.weight(1f)
-                    )
-
-                    IconButton(
-                        onClick = { onStepLengthCmPerson1Changed((stepLengthCmPerson1 + 1).coerceAtMost(150)) },
-                        colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color(0xFFEADDFF)),
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        Icon(imageVector = Icons.Default.Add, contentDescription = "Erhöhen", tint = Color(0xFF21005D), modifier = Modifier.size(16.dp))
-                    }
-                }
-            }
-
-            HorizontalDivider(color = Color(0xFFCAC4D0).copy(alpha = 0.5f))
-
-            // -- PERSON 2 SECTION --
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Person 2",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF6750A4)
-                    )
-                    Surface(
+                    OutlinedTextField(
+                        value = person1Name,
+                        onValueChange = onPerson1NameChanged,
+                        label = { Text("Name Person 1") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth().testTag("edit_p1_name"),
                         shape = RoundedCornerShape(12.dp),
-                        color = Color(0xFFEADDFF)
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
+                            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                        )
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        IconButton(
+                            onClick = { onStepLengthCmPerson1Changed((stepLengthCmPerson1 - 1).coerceAtLeast(30)) },
+                            colors = IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            Icon(imageVector = Icons.Default.Remove, contentDescription = "Verringern", tint = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.size(16.dp))
+                        }
+
+                        Slider(
+                            value = stepLengthCmPerson1.toFloat(),
+                            onValueChange = { onStepLengthCmPerson1Changed(it.toInt()) },
+                            valueRange = 30f..150f,
+                            steps = 120,
+                            colors = SliderDefaults.colors(
+                                thumbColor = MaterialTheme.colorScheme.primary,
+                                activeTrackColor = MaterialTheme.colorScheme.primary,
+                                inactiveTrackColor = MaterialTheme.colorScheme.outlineVariant
+                            ),
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        IconButton(
+                            onClick = { onStepLengthCmPerson1Changed((stepLengthCmPerson1 + 1).coerceAtMost(150)) },
+                            colors = IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            Icon(imageVector = Icons.Default.Add, contentDescription = "Erhöhen", tint = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.size(16.dp))
+                        }
+                    }
+                }
+
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), modifier = Modifier.padding(vertical = 4.dp))
+
+                // -- PERSON 2 SECTION --
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "$stepLengthCmPerson2 cm",
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                            style = MaterialTheme.typography.labelSmall,
+                            text = "Person 2",
+                            style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF21005D)
+                            color = MaterialTheme.colorScheme.primary
                         )
-                    }
-                }
-
-                OutlinedTextField(
-                    value = person2Name,
-                    onValueChange = onPerson2NameChanged,
-                    label = { Text("Name Person 2") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth().testTag("edit_p2_name"),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color(0xFF1D1B20),
-                        unfocusedTextColor = Color(0xFF1D1B20),
-                        focusedBorderColor = Color(0xFF6750A4),
-                        focusedLabelColor = Color(0xFF6750A4),
-                        unfocusedLabelColor = Color(0xFF49454F),
-                        unfocusedBorderColor = Color(0xFFCAC4D0)
-                    )
-                )
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    IconButton(
-                        onClick = { onStepLengthCmPerson2Changed((stepLengthCmPerson2 - 1).coerceAtLeast(30)) },
-                        colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color(0xFFEADDFF)),
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        Icon(imageVector = Icons.Default.Remove, contentDescription = "Verringern", tint = Color(0xFF21005D), modifier = Modifier.size(16.dp))
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = MaterialTheme.colorScheme.primaryContainer
+                        ) {
+                            Text(
+                                text = "$stepLengthCmPerson2 cm",
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                            )
+                        }
                     }
 
-                    Slider(
-                        value = stepLengthCmPerson2.toFloat(),
-                        onValueChange = { onStepLengthCmPerson2Changed(it.toInt()) },
-                        valueRange = 30f..150f,
-                        steps = 120,
-                        colors = SliderDefaults.colors(
-                            thumbColor = Color(0xFF6750A4),
-                            activeTrackColor = Color(0xFF6750A4)
-                        ),
-                        modifier = Modifier.weight(1f)
+                    OutlinedTextField(
+                        value = person2Name,
+                        onValueChange = onPerson2NameChanged,
+                        label = { Text("Name Person 2") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth().testTag("edit_p2_name"),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            focusedLabelColor = MaterialTheme.colorScheme.primary,
+                            unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                        )
                     )
 
-                    IconButton(
-                        onClick = { onStepLengthCmPerson2Changed((stepLengthCmPerson2 + 1).coerceAtMost(150)) },
-                        colors = IconButtonDefaults.filledIconButtonColors(containerColor = Color(0xFFEADDFF)),
-                        modifier = Modifier.size(36.dp)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Icon(imageVector = Icons.Default.Add, contentDescription = "Erhöhen", tint = Color(0xFF21005D), modifier = Modifier.size(16.dp))
+                        IconButton(
+                            onClick = { onStepLengthCmPerson2Changed((stepLengthCmPerson2 - 1).coerceAtLeast(30)) },
+                            colors = IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            Icon(imageVector = Icons.Default.Remove, contentDescription = "Verringern", tint = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.size(16.dp))
+                        }
+
+                        Slider(
+                            value = stepLengthCmPerson2.toFloat(),
+                            onValueChange = { onStepLengthCmPerson2Changed(it.toInt()) },
+                            valueRange = 30f..150f,
+                            steps = 120,
+                            colors = SliderDefaults.colors(
+                                thumbColor = MaterialTheme.colorScheme.primary,
+                                activeTrackColor = MaterialTheme.colorScheme.primary,
+                                inactiveTrackColor = MaterialTheme.colorScheme.outlineVariant
+                            ),
+                            modifier = Modifier.weight(1f)
+                        )
+
+                        IconButton(
+                            onClick = { onStepLengthCmPerson2Changed((stepLengthCmPerson2 + 1).coerceAtMost(150)) },
+                            colors = IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            Icon(imageVector = Icons.Default.Add, contentDescription = "Erhöhen", tint = MaterialTheme.colorScheme.onPrimaryContainer, modifier = Modifier.size(16.dp))
+                        }
                     }
                 }
             }
@@ -1827,9 +1903,9 @@ fun PeriodSelectionHeader(
             .testTag("period_selection_card"),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF3EDF7)
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
         ),
-        border = BorderStroke(1.dp, Color(0xFFCAC4D0).copy(alpha = 0.5f))
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
     ) {
         Row(
             modifier = Modifier
@@ -1845,7 +1921,7 @@ fun PeriodSelectionHeader(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                     contentDescription = if (activePeriodType == PeriodType.WEEK) "Vorherige Woche" else "Vorheriger Monat",
-                    tint = Color(0xFF6750A4)
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
 
@@ -1856,7 +1932,7 @@ fun PeriodSelectionHeader(
                 Text(
                     text = if (activePeriodType == PeriodType.WEEK) "WÖCHENTLICHE AUSWAHL" else "MONATSAUSWAHL",
                     fontSize = 10.sp,
-                    color = Color(0xFF49454F),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 0.5.sp
                 )
@@ -1864,7 +1940,7 @@ fun PeriodSelectionHeader(
                     text = displayRange,
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1D1B20),
+                    color = MaterialTheme.colorScheme.onSurface,
                     textAlign = TextAlign.Center
                 )
             }
@@ -1876,7 +1952,7 @@ fun PeriodSelectionHeader(
                 Icon(
                     imageVector = Icons.Default.Today,
                     contentDescription = if (activePeriodType == PeriodType.WEEK) "Aktuelle Woche" else "Aktueller Monat",
-                    tint = Color(0xFF6750A4),
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -1888,7 +1964,7 @@ fun PeriodSelectionHeader(
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = if (activePeriodType == PeriodType.WEEK) "Nächste Woche" else "Nächster Monat",
-                    tint = Color(0xFF6750A4)
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
         }
@@ -1962,10 +2038,10 @@ fun MonthlyBarGraph(
 
                 val animatedBarColor by animateColorAsState(
                     targetValue = when {
-                        isSelected -> Color(0xFF6750A4)
-                        day.steps >= 10000 -> Color(0xFF6750A4)
-                        day.steps > 0 -> Color(0xFFE8DEF8)
-                        else -> Color(0xFFF4F3F7)
+                        isSelected -> MaterialTheme.colorScheme.primary
+                        day.steps >= 10000 -> MaterialTheme.colorScheme.primary
+                        day.steps > 0 -> MaterialTheme.colorScheme.primaryContainer
+                        else -> MaterialTheme.colorScheme.surfaceVariant
                     },
                     label = "bar_color"
                 )
@@ -2003,8 +2079,8 @@ fun MonthlyBarGraph(
                                     .background(
                                         Brush.verticalGradient(
                                             colors = listOf(
-                                                Color(0xFFCCC9D2),
-                                                Color(0xFFE5E2EB)
+                                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+                                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.25f)
                                             )
                                         )
                                     )
@@ -2029,8 +2105,8 @@ fun MonthlyBarGraph(
                                     } else {
                                         Brush.verticalGradient(
                                             colors = listOf(
-                                                Color(0xFFE7E0EC).copy(alpha = 0.3f),
-                                                Color(0xFFE7E0EC).copy(alpha = 0.1f)
+                                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.1f)
                                             )
                                         )
                                     }
@@ -2039,13 +2115,13 @@ fun MonthlyBarGraph(
                                     if (day.steps > 0) {
                                         Modifier.border(
                                             width = if (isSelected) 1.8.dp else 0.8.dp,
-                                            color = Color(0xFF4F378B),
+                                            color = MaterialTheme.colorScheme.primary,
                                             shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
                                         )
                                     } else if (isSelected) {
                                         Modifier.border(
                                             width = 1.1.dp,
-                                            color = Color(0xFF6750A4),
+                                            color = MaterialTheme.colorScheme.primary,
                                             shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
                                         )
                                     } else Modifier
@@ -2073,13 +2149,13 @@ fun MonthlyBarGraph(
                                     style = MaterialTheme.typography.bodySmall,
                                     fontSize = 10.sp,
                                     fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF6750A4)
+                                    color = MaterialTheme.colorScheme.primary
                                 )
                                 Box(
                                     modifier = Modifier
                                         .size(3.dp)
                                         .clip(CircleShape)
-                                        .background(Color(0xFF6750A4))
+                                        .background(MaterialTheme.colorScheme.primary)
                                 )
                             }
                         } else if (isLabelDay) {
@@ -2088,7 +2164,7 @@ fun MonthlyBarGraph(
                                 style = MaterialTheme.typography.bodySmall,
                                 fontSize = 8.5.sp,
                                 fontWeight = FontWeight.Normal,
-                                color = Color(0xFF79747E)
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                               )
                         } else {
                             Box(
@@ -2096,7 +2172,7 @@ fun MonthlyBarGraph(
                                     .padding(top = 4.dp)
                                     .size(2.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0xFFCAC4D0).copy(alpha = 0.6f))
+                                    .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.6f))
                             )
                         }
 
@@ -2194,10 +2270,10 @@ fun WeeklyBarGraph(
             // High Density style colors
             val animatedBarColor by animateColorAsState(
                 targetValue = when {
-                    isSelected -> Color(0xFF6750A4) // Selected deep purple
-                    day.steps >= 10000 -> Color(0xFF6750A4) // Matches PacerTrack primary purple
-                    day.steps > 0 -> Color(0xFFE8DEF8) // Inactive purple level
-                    else -> Color(0xFFFEF7FF) // Empty backdrop
+                    isSelected -> MaterialTheme.colorScheme.primary // Selected
+                    day.steps >= 10000 -> MaterialTheme.colorScheme.primary // Target met
+                    day.steps > 0 -> MaterialTheme.colorScheme.primaryContainer // Active steps
+                    else -> MaterialTheme.colorScheme.surfaceVariant // Backdrop empty
                 },
                 label = "bar_color"
             )
@@ -2226,7 +2302,7 @@ fun WeeklyBarGraph(
                             text = displayStepText,
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                            color = if (isSelected) Color(0xFF6750A4) else Color(0xFF49454F),
+                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 9.sp,
                             textAlign = TextAlign.Center
                         )
@@ -2258,8 +2334,8 @@ fun WeeklyBarGraph(
                                 .background(
                                     Brush.verticalGradient(
                                         colors = listOf(
-                                            Color(0xFFCCC9D2),
-                                            Color(0xFFE5E2EB)
+                                            MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
+                                            MaterialTheme.colorScheme.secondary.copy(alpha = 0.25f)
                                         )
                                     )
                                 )
@@ -2284,8 +2360,8 @@ fun WeeklyBarGraph(
                                 } else {
                                     Brush.verticalGradient(
                                         colors = listOf(
-                                            Color(0xFFE7E0EC).copy(alpha = 0.4f),
-                                            Color(0xFFE7E0EC).copy(alpha = 0.15f)
+                                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.15f)
                                         )
                                     )
                                 }
@@ -2294,13 +2370,13 @@ fun WeeklyBarGraph(
                                 if (day.steps > 0) {
                                     Modifier.border(
                                         width = if (isSelected) 2.5.dp else 1.2.dp,
-                                        color = Color(0xFF4F378B),
+                                        color = MaterialTheme.colorScheme.primary,
                                         shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
                                     )
                                 } else if (isSelected) {
                                     Modifier.border(
                                         width = 1.5.dp,
-                                        color = Color(0xFF6750A4),
+                                        color = MaterialTheme.colorScheme.primary,
                                         shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
                                     )
                                 } else Modifier
@@ -2316,7 +2392,7 @@ fun WeeklyBarGraph(
                     style = MaterialTheme.typography.bodySmall,
                     fontSize = 11.sp,
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                    color = if (isSelected) Color(0xFF6750A4) else Color(0xFF49454F)
+                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 // Calendar date label (dd.)
@@ -2326,7 +2402,7 @@ fun WeeklyBarGraph(
                     style = MaterialTheme.typography.labelSmall,
                     fontSize = 9.sp,
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Light,
-                    color = if (isSelected) Color(0xFF6750A4) else Color(0xFF49454F).copy(alpha = 0.7f)
+                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                 )
 
                 Row(
@@ -2338,7 +2414,7 @@ fun WeeklyBarGraph(
                         Icon(
                             imageVector = Icons.Default.ChatBubble,
                             contentDescription = "Notiz von aktiver Person vorhanden",
-                            tint = Color(0xFF6750A4),
+                            tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(9.dp)
                         )
                     }
@@ -2346,7 +2422,7 @@ fun WeeklyBarGraph(
                         Icon(
                             imageVector = Icons.Default.ChatBubble,
                             contentDescription = "Notiz von inaktiver Person vorhanden",
-                            tint = Color(0xFFCCC9D2),
+                            tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
                             modifier = Modifier.size(9.dp)
                         )
                     }
@@ -2381,10 +2457,10 @@ private fun FactoredRemarkBubble(
                     .padding(horizontal = 8.dp)
             ) {
                 Surface(
-                    color = Color(0xFF21005D),
+                    color = MaterialTheme.colorScheme.inverseSurface,
                     shape = RoundedCornerShape(12.dp),
                     shadowElevation = 6.dp,
-                    border = BorderStroke(1.dp, Color(0xFFE8DEF8).copy(alpha = 0.4f))
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.inverseOnSurface.copy(alpha = 0.4f))
                 ) {
                     Row(
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
@@ -2394,12 +2470,12 @@ private fun FactoredRemarkBubble(
                         Icon(
                             imageVector = Icons.Default.Notes,
                             contentDescription = null,
-                            tint = Color(0xFFE8DEF8),
+                            tint = MaterialTheme.colorScheme.inverseOnSurface,
                             modifier = Modifier.size(14.dp)
                         )
                         Text(
                             text = remark,
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.inverseOnSurface,
                             fontSize = 11.sp,
                             fontWeight = FontWeight.SemiBold,
                             style = MaterialTheme.typography.bodySmall,
@@ -2414,7 +2490,7 @@ private fun FactoredRemarkBubble(
                         .offset(y = (-4).dp)
                         .size(8.dp)
                         .rotate(45f)
-                        .background(Color(0xFF21005D))
+                        .background(MaterialTheme.colorScheme.inverseSurface)
                 )
             }
         }
@@ -2433,9 +2509,9 @@ fun MetricCard(
         modifier = modifier,
         shape = RoundedCornerShape(24.dp), // modern highly-rounded specs
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF3EDF7) // Tailwind stats backgrounds
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
         ),
-        border = BorderStroke(1.dp, Color(0xFFCAC4D0).copy(alpha = 0.3f))
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
     ) {
         Column(
             modifier = Modifier
@@ -2447,7 +2523,7 @@ fun MetricCard(
                 text = title.uppercase(),
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF49454F),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 letterSpacing = 0.5.sp
             )
 
@@ -2458,7 +2534,7 @@ fun MetricCard(
                     text = value,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF6750A4)
+                    color = MaterialTheme.colorScheme.primary
                 )
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -2467,13 +2543,13 @@ fun MetricCard(
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = Color(0xFF49454F),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(11.dp)
                     )
                     Text(
                         text = "Aktive Auswertung",
                         fontSize = 9.sp,
-                        color = Color(0xFF49454F)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -2506,9 +2582,9 @@ fun LogItemRow(
             .testTag("log_item_row_${dayData.dateStr}"),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor = MaterialTheme.colorScheme.surface
         ),
-        border = BorderStroke(1.dp, Color(0xFFCAC4D0).copy(alpha = 0.5f))
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
     ) {
         Row(
             modifier = Modifier
@@ -2518,14 +2594,14 @@ fun LogItemRow(
         ) {
             Surface(
                 shape = RoundedCornerShape(12.dp),
-                color = Color(0xFFE8DEF8),
+                color = MaterialTheme.colorScheme.primaryContainer,
                 modifier = Modifier.size(40.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = Icons.Default.DirectionsRun,
                         contentDescription = null,
-                        tint = Color(0xFF6750A4),
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -2544,36 +2620,36 @@ fun LogItemRow(
                         text = "$entryNumber.",
                         fontWeight = FontWeight.Black,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFF6750A4)
+                        color = MaterialTheme.colorScheme.primary
                     )
                     Text(
                         text = "•",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFFCAC4D0)
+                        color = MaterialTheme.colorScheme.outline
                     )
                     Text(
                         text = "$weekday, $displayDate",
                         fontWeight = FontWeight.Bold,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFF1D1B20)
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
                 Text(
                     text = "%, d Schritte • %.2f km".format(Locale.GERMANY, dayData.steps, dayData.distanceKm),
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFF49454F)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 if (dayData.remark.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(4.dp))
                     Surface(
                         shape = RoundedCornerShape(8.dp),
-                        color = Color(0xFFF3EDF7)
+                        color = MaterialTheme.colorScheme.surfaceVariant
                     ) {
                         Text(
                             text = dayData.remark,
                             style = MaterialTheme.typography.bodySmall,
                             fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                            color = Color(0xFF6750A4),
+                            color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )
                     }
@@ -2591,7 +2667,7 @@ fun LogItemRow(
                     Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = "Eintrag bearbeiten",
-                        tint = Color(0xFF49454F),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -2636,15 +2712,15 @@ fun StepEntryDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = Color(0xFFFEF7FF),
-        titleContentColor = Color(0xFF1D1B20),
-        textContentColor = Color(0xFF49454F),
+        containerColor = MaterialTheme.colorScheme.surface,
+        titleContentColor = MaterialTheme.colorScheme.onSurface,
+        textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
         title = {
             Text(
                 text = if (initialStepsStr.isEmpty()) "Schritte erfassen" else "Eintrag bearbeiten",
                 fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.titleLarge,
-                color = Color(0xFF1D1B20)
+                color = MaterialTheme.colorScheme.onSurface
             )
         },
         text = {
@@ -2662,7 +2738,7 @@ fun StepEntryDialog(
                         text = "Person auswählen",
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF6750A4),
+                        color = MaterialTheme.colorScheme.primary,
                         letterSpacing = 0.5.sp
                     )
                     Row(
@@ -2677,10 +2753,10 @@ fun StepEntryDialog(
                             modifier = Modifier.weight(1f).height(44.dp).testTag("dialog_select_person_1"),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isP1) Color(0xFFEADDFF) else Color.Transparent,
-                                contentColor = if (isP1) Color(0xFF21005D) else Color(0xFF49454F)
+                                containerColor = if (isP1) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+                                contentColor = if (isP1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
                             ),
-                            border = if (isP1) null else BorderStroke(1.dp, Color(0xFFCAC4D0)),
+                            border = if (isP1) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                             contentPadding = PaddingValues(horizontal = 8.dp)
                         ) {
                             Row(
@@ -2708,10 +2784,10 @@ fun StepEntryDialog(
                             modifier = Modifier.weight(1f).height(44.dp).testTag("dialog_select_person_2"),
                             shape = RoundedCornerShape(12.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isP2) Color(0xFFEADDFF) else Color.Transparent,
-                                contentColor = if (isP2) Color(0xFF21005D) else Color(0xFF49454F)
+                                containerColor = if (isP2) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+                                contentColor = if (isP2) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
                             ),
-                            border = if (isP2) null else BorderStroke(1.dp, Color(0xFFCAC4D0)),
+                            border = if (isP2) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
                             contentPadding = PaddingValues(horizontal = 8.dp)
                         ) {
                             Row(
@@ -2768,7 +2844,8 @@ fun StepEntryDialog(
                         .fillMaxWidth()
                         .height(56.dp)
                         .testTag("dialog_date_select"),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(12.dp),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -2776,14 +2853,14 @@ fun StepEntryDialog(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Icon(Icons.Default.CalendarToday, contentDescription = null, tint = Color(0xFF6750A4))
+                            Icon(Icons.Default.CalendarToday, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                             Text(
                                 text = "Datum: $formattedGermanDate",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color(0xFF1D1B20)
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
-                        Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = Color(0xFF6750A4))
+                        Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                     }
                 }
 
@@ -2795,30 +2872,30 @@ fun StepEntryDialog(
                             stepsField = input
                         }
                     },
-                    label = { Text("Schritte", color = Color(0xFF49454F)) },
-                    placeholder = { Text("z.B. 10000", color = Color(0xFF79747E)) },
+                    label = { Text("Schritte") },
+                    placeholder = { Text("z.B. 10000") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color(0xFF1D1B20),
-                        unfocusedTextColor = Color(0xFF1D1B20),
-                        focusedLabelColor = Color(0xFF6750A4),
-                        unfocusedLabelColor = Color(0xFF49454F),
-                        focusedBorderColor = Color(0xFF6750A4),
-                        unfocusedBorderColor = Color(0xFFCAC4D0),
-                        cursorColor = Color(0xFF6750A4)
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        focusedLabelColor = MaterialTheme.colorScheme.primary,
+                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        cursorColor = MaterialTheme.colorScheme.primary
                     ),
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("dialog_steps_input"),
                     leadingIcon = {
-                        Icon(Icons.Default.DirectionsRun, contentDescription = null, tint = Color(0xFF6750A4))
+                        Icon(Icons.Default.DirectionsRun, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                     },
                     trailingIcon = {
                         if (stepsField.isNotEmpty()) {
                             IconButton(onClick = { stepsField = "" }) {
-                                Icon(Icons.Default.Clear, contentDescription = "Eingabe löschen", tint = Color(0xFF49454F))
+                                  Icon(Icons.Default.Clear, contentDescription = "Eingabe löschen", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                     }
@@ -2828,29 +2905,29 @@ fun StepEntryDialog(
                 OutlinedTextField(
                     value = remarkField,
                     onValueChange = { remarkField = it },
-                    label = { Text("Bemerkung", color = Color(0xFF49454F)) },
-                    placeholder = { Text("z.B. Abendspaziergang", color = Color(0xFF79747E)) },
+                    label = { Text("Bemerkung") },
+                    placeholder = { Text("z.B. Abendspaziergang") },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color(0xFF1D1B20),
-                        unfocusedTextColor = Color(0xFF1D1B20),
-                        focusedLabelColor = Color(0xFF6750A4),
-                        unfocusedLabelColor = Color(0xFF49454F),
-                        focusedBorderColor = Color(0xFF6750A4),
-                        unfocusedBorderColor = Color(0xFFCAC4D0),
-                        cursorColor = Color(0xFF6750A4)
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        focusedLabelColor = MaterialTheme.colorScheme.primary,
+                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                        cursorColor = MaterialTheme.colorScheme.primary
                     ),
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("dialog_remark_input"),
                     leadingIcon = {
-                        Icon(Icons.Default.Notes, contentDescription = null, tint = Color(0xFF6750A4))
+                        Icon(Icons.Default.Notes, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                     },
                     trailingIcon = {
                         if (remarkField.isNotEmpty()) {
                             IconButton(onClick = { remarkField = "" }) {
-                                Icon(Icons.Default.Clear, contentDescription = "Eingabe löschen", tint = Color(0xFF49454F))
+                                Icon(Icons.Default.Clear, contentDescription = "Eingabe löschen", tint = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                     }
@@ -2867,33 +2944,36 @@ fun StepEntryDialog(
                     }
                     Button(
                         onClick = { addAmount(1000) },
-                        colors = ButtonDefaults.textButtonColors(
-                            containerColor = Color(0xFFE8DEF8)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                         ),
                         modifier = Modifier.weight(1f).testTag("quick_add_1k"),
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text("+1.000", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1D192B))
+                        Text("+1.000", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     }
                     Button(
                         onClick = { addAmount(5000) },
-                        colors = ButtonDefaults.textButtonColors(
-                            containerColor = Color(0xFFE8DEF8)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                         ),
                         modifier = Modifier.weight(1f).testTag("quick_add_5k"),
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text("+5.000", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1D192B))
+                        Text("+5.000", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     }
                     Button(
                         onClick = { addAmount(10000) },
-                        colors = ButtonDefaults.textButtonColors(
-                            containerColor = Color(0xFFE8DEF8)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                         ),
                         modifier = Modifier.weight(1f).testTag("quick_add_10k"),
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text("+10.000", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1D192B))
+                        Text("+10.000", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                     }
                 }
 
@@ -2922,7 +3002,8 @@ fun StepEntryDialog(
                 modifier = Modifier.testTag("dialog_save_button"),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF6750A4)
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 )
             ) {
                 Text("Speichern")
@@ -2933,7 +3014,7 @@ fun StepEntryDialog(
                 onClick = onDismiss,
                 modifier = Modifier.testTag("dialog_cancel_button")
             ) {
-                Text("Abbrechen", color = Color(0xFF6750A4))
+                Text("Abbrechen", color = MaterialTheme.colorScheme.primary)
             }
         }
     )
@@ -3364,7 +3445,9 @@ fun generateMonthlyReportHtml(monthLabel: String, stats: MonthlyStats, stepLengt
 
 @Composable
 fun LocalBackupCard(
-    viewModel: StepViewModel
+    viewModel: StepViewModel,
+    isExpanded: Boolean,
+    onToggle: () -> Unit
 ) {
     val context = LocalContext.current
     val isLoading by viewModel.isBackupRestoreLoading.collectAsStateWithLifecycle()
@@ -3396,264 +3479,288 @@ fun LocalBackupCard(
             .testTag("local_backup_card"),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF3EDF7)
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         ),
-        border = BorderStroke(1.dp, Color(0xFFCAC4D0).copy(alpha = 0.6f))
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // Clickable Header
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onToggle() },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.weight(1f)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Save,
-                        contentDescription = null,
-                        tint = Color(0xFF6750A4),
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Text(
-                        text = "Lokale Datensicherung",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1D1B20)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                shape = RoundedCornerShape(10.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Save,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    Column {
+                        Text(
+                            text = "Backup & Wiederherstellung",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = if (isExpanded) "Daten sichern und einlesen" else "Daten sichern & wiederherstellen",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
-
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = Color(0xFF6750A4).copy(alpha = 0.1f),
-                    contentColor = Color(0xFF6750A4)
-                ) {
-                    Text(
-                        text = if (customBackupDirUri.isNotEmpty()) "Eigener Pfad" else "Standarddatei",
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                Icon(
+                    imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    contentDescription = if (isExpanded) "Zuklappen" else "Aufklappen",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
             }
 
-            Text(
-                text = "Die Sicherung wird immer in die konfigurierte Datei geschrieben und überschreibt diese, damit keine unübersichtlichen Dateidubletten entstehen.",
-                style = MaterialTheme.typography.bodySmall,
-                color = Color(0xFF49454F)
-            )
-
-            // Dynamic storage path configuration
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color(0xFFEADDFF).copy(alpha = 0.3f), RoundedCornerShape(16.dp))
-                    .padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Text(
-                    text = "Konfigurierter Speicherort:",
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF21005D)
-                )
-                
-                val currentPathText = if (customBackupDirUri.isNotEmpty()) {
-                    val readablePath = rememberFolderDisplayName(context, customBackupDirUri)
-                    "Ordner: $readablePath\nDatei: $customBackupFileName"
-                } else {
-                    "Ordner: App-Speicher (.../files/Documents/)\nDatei: $customBackupFileName"
-                }
+            if (isExpanded) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
 
                 Text(
-                    text = currentPathText,
+                    text = "Die Sicherung wird immer in die konfigurierte Datei geschrieben und überschreibt diese, damit keine unübersichtlichen Dateidubletten entstehen.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFF49454F),
-                    lineHeight = 16.sp
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+
+                // Dynamic storage path configuration
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f), RoundedCornerShape(16.dp))
+                        .padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Button(
-                        onClick = {
-                            try {
-                                directoryPicker.launch(null)
-                            } catch (e: Exception) {
-                                Toast.makeText(context, "Ordnerauswahl fehlgeschlagen: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF6750A4)
-                        ),
-                        modifier = Modifier.weight(1.5f),
-                        shape = RoundedCornerShape(8.dp),
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
-                    ) {
-                        Text("Ordner wählen", fontSize = 11.sp, maxLines = 1)
+                    Text(
+                        text = "Konfigurierter Speicherort:",
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    
+                    val currentPathText = if (customBackupDirUri.isNotEmpty()) {
+                        val readablePath = rememberFolderDisplayName(context, customBackupDirUri)
+                        "Ordner: $readablePath\nDatei: $customBackupFileName"
+                    } else {
+                        "Ordner: App-Speicher (.../files/Documents/)\nDatei: $customBackupFileName"
                     }
 
-                    if (customBackupDirUri.isNotEmpty()) {
+                    Text(
+                        text = currentPathText,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = 16.sp
+                    )
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         Button(
                             onClick = {
-                                viewModel.setCustomBackupDirUri("")
-                                Toast.makeText(context, "Auf Standard-Speicherort zurückgesetzt!", Toast.LENGTH_LONG).show()
+                                try {
+                                    directoryPicker.launch(null)
+                                } catch (e: Exception) {
+                                    Toast.makeText(context, "Ordnerauswahl fehlgeschlagen: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
+                                }
                             },
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0xFFEADDFF)
+                                containerColor = MaterialTheme.colorScheme.primary
                             ),
-                            modifier = Modifier.weight(1.2f),
+                            modifier = Modifier.weight(1.5f),
                             shape = RoundedCornerShape(8.dp),
                             contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
                         ) {
-                            Text("Standard", color = Color(0xFF21005D), fontSize = 11.sp, maxLines = 1)
+                            Text("Ordner wählen", fontSize = 11.sp, maxLines = 1)
+                        }
+
+                        if (customBackupDirUri.isNotEmpty()) {
+                            Button(
+                                onClick = {
+                                    viewModel.setCustomBackupDirUri("")
+                                    Toast.makeText(context, "Auf Standard-Speicherort zurückgesetzt!", Toast.LENGTH_LONG).show()
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                                ),
+                                modifier = Modifier.weight(1.2f),
+                                shape = RoundedCornerShape(8.dp),
+                                contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                            ) {
+                                Text("Standard", color = MaterialTheme.colorScheme.onPrimaryContainer, fontSize = 11.sp, maxLines = 1)
+                            }
+                        }
+                    }
+
+                    // Dateiname ändern
+                    var tempFileName by remember(customBackupFileName) { mutableStateOf(customBackupFileName) }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = tempFileName,
+                            onValueChange = { tempFileName = it },
+                            placeholder = { Text("pacertrack_backup.json") },
+                            singleLine = true,
+                            modifier = Modifier.weight(1f),
+                            textStyle = MaterialTheme.typography.bodySmall,
+                            shape = RoundedCornerShape(8.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                            )
+                        )
+                        Button(
+                            onClick = {
+                                viewModel.setCustomBackupFileName(tempFileName)
+                                Toast.makeText(context, "Dateiname gespeichert!", Toast.LENGTH_SHORT).show()
+                            },
+                            shape = RoundedCornerShape(8.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                        ) {
+                            Text("Ok", fontSize = 11.sp)
                         }
                     }
                 }
 
-                // Dateiname ändern
-                var tempFileName by remember(customBackupFileName) { mutableStateOf(customBackupFileName) }
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), thickness = 1.dp)
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Automatische Sicherung",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = "Sichert Änderungen im Schrittverlauf automatisch im Hintergrund in der Standarddatei.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Spacer(Modifier.width(16.dp))
+                    Switch(
+                        checked = isAutoBackupEnabled,
+                        onCheckedChange = { viewModel.setAutoBackupEnabled(it) },
+                        modifier = Modifier.testTag("auto_backup_switch"),
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                            checkedTrackColor = MaterialTheme.colorScheme.primary,
+                            uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+                            uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    )
+                }
+
+                if (lastBackupTime != "Nie") {
+                    Text(
+                        text = "Letzte Sicherung: $lastBackupTime",
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.Medium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f), thickness = 1.dp)
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    OutlinedTextField(
-                        value = tempFileName,
-                        onValueChange = { tempFileName = it },
-                        placeholder = { Text("pacertrack_backup.json") },
-                        singleLine = true,
-                        modifier = Modifier.weight(1f),
-                        textStyle = MaterialTheme.typography.bodySmall,
-                        shape = RoundedCornerShape(8.dp),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedTextColor = Color(0xFF6750A4),
-                            unfocusedTextColor = Color(0xFF6750A4),
-                            focusedBorderColor = Color(0xFF6750A4),
-                            unfocusedBorderColor = Color(0xFFCAC4D0),
-                            focusedContainerColor = Color.White,
-                            unfocusedContainerColor = Color.White
-                        )
-                    )
                     Button(
-                        onClick = {
-                            viewModel.setCustomBackupFileName(tempFileName)
-                            Toast.makeText(context, "Dateiname gespeichert!", Toast.LENGTH_SHORT).show()
-                        },
-                        shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6750A4)),
-                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+                        onClick = { viewModel.backupToLocalFile(context) },
+                        modifier = Modifier.weight(1f),
+                        enabled = !isLoading,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
+                        )
                     ) {
-                        Text("Ok", fontSize = 11.sp)
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text("Sichern", fontSize = 13.sp)
+                        }
                     }
-                }
-            }
 
-            HorizontalDivider(color = Color(0xFFCAC4D0).copy(alpha = 0.4f), thickness = 1.dp)
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Automatische Sicherung",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1D1B20)
-                    )
-                    Text(
-                        text = "Sichert Änderungen im Schrittverlauf automatisch im Hintergrund in der Standarddatei.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFF49454F)
-                    )
-                }
-                Spacer(Modifier.width(16.dp))
-                Switch(
-                    checked = isAutoBackupEnabled,
-                    onCheckedChange = { viewModel.setAutoBackupEnabled(it) },
-                    modifier = Modifier.testTag("auto_backup_switch")
-                )
-            }
-
-            if (lastBackupTime != "Nie") {
-                Text(
-                    text = "Letzte Sicherung: $lastBackupTime",
-                    style = MaterialTheme.typography.bodySmall,
-                    fontWeight = FontWeight.Medium,
-                    color = Color(0xFF6750A4)
-                )
-            }
-
-            HorizontalDivider(color = Color(0xFFCAC4D0).copy(alpha = 0.4f), thickness = 1.dp)
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Button(
-                    onClick = { viewModel.backupToLocalFile(context) },
-                    modifier = Modifier.weight(1f),
-                    enabled = !isLoading,
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF6750A4)
-                    )
-                ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(16.dp),
-                            color = Color.White,
-                            strokeWidth = 2.dp
+                    Button(
+                        onClick = { viewModel.restoreFromLocalFile(context) },
+                        modifier = Modifier.weight(1f),
+                        enabled = !isLoading,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primary
                         )
-                    } else {
-                        Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(Modifier.width(4.dp))
-                        Text("Sichern", fontSize = 13.sp)
+                    ) {
+                        if (isLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text("Einspielen", fontSize = 13.sp)
+                        }
                     }
                 }
 
                 Button(
-                    onClick = { viewModel.restoreFromLocalFile(context) },
-                    modifier = Modifier.weight(1f),
-                    enabled = !isLoading,
+                    onClick = { viewModel.shareBackupFile(context) },
+                    modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF6750A4)
+                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                        contentColor = MaterialTheme.colorScheme.primary
                     )
                 ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(16.dp),
-                            color = Color.White,
-                            strokeWidth = 2.dp
-                        )
-                    } else {
-                        Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(16.dp))
-                        Spacer(Modifier.width(4.dp))
-                        Text("Einspielen", fontSize = 13.sp)
-                    }
+                    Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("Sicherungsdatei teilen / senden", fontSize = 13.sp)
                 }
-            }
-
-            Button(
-                onClick = { viewModel.shareBackupFile(context) },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF6750A4).copy(alpha = 0.1f),
-                    contentColor = Color(0xFF6750A4)
-                )
-            ) {
-                Icon(Icons.Default.Share, contentDescription = null, modifier = Modifier.size(16.dp))
-                Spacer(Modifier.width(8.dp))
-                Text("Sicherungsdatei teilen / senden", fontSize = 13.sp)
             }
         }
     }
@@ -3661,7 +3768,9 @@ fun LocalBackupCard(
 
 @Composable
 fun AlarmSettingsCard(
-    viewModel: StepViewModel
+    viewModel: StepViewModel,
+    isExpanded: Boolean,
+    onToggle: () -> Unit
 ) {
     val context = LocalContext.current
     val alarmEnabled by viewModel.alarmEnabled.collectAsStateWithLifecycle()
@@ -3690,153 +3799,449 @@ fun AlarmSettingsCard(
             .testTag("alarm_settings_card"),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFFF3EDF7)
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         ),
-        border = BorderStroke(1.dp, Color(0xFFCAC4D0).copy(alpha = 0.6f))
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Header
+            // Clickable Header
             Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onToggle() },
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                shape = RoundedCornerShape(10.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.NotificationsActive,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    Column {
+                        Text(
+                            text = "Tägliche Erinnerung",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = if (isExpanded) "Erinnerungen anpassen" else "Tägliche Schritterinnerung verwalten",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
                 Icon(
-                    imageVector = Icons.Default.NotificationsActive,
-                    contentDescription = null,
-                    tint = Color(0xFF6750A4),
+                    imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    contentDescription = if (isExpanded) "Zuklappen" else "Aufklappen",
+                    tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
                 )
+            }
+
+            if (isExpanded) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+
                 Text(
-                    text = "Tägliche Erinnerung",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1D1B20)
+                    text = "Erhalte eine tägliche Benachrichtigung, falls am aktuellen Tag noch keine Schritte für eine der Personen eingetragen wurden.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-            }
 
-            Text(
-                text = "Erhalte eine tägliche Benachrichtigung, falls am aktuellen Tag noch keine Schritte für eine der Personen eingetragen wurden.",
-                style = MaterialTheme.typography.bodySmall,
-                color = Color(0xFF49454F)
-            )
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), modifier = Modifier.padding(vertical = 4.dp))
 
-            HorizontalDivider(color = Color(0xFFCAC4D0).copy(alpha = 0.5f))
-
-            // Toggle Row
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Erinnerung aktivieren",
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Medium,
-                        color = Color(0xFF1D1B20)
-                    )
-                    Text(
-                        text = if (alarmEnabled) "Aktiviert für ${String.format("%02d:%02d", alarmHour, alarmMinute)} Uhr" else "Deaktiviert",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFF49454F)
-                    )
-                }
-
-                Switch(
-                    checked = alarmEnabled,
-                    onCheckedChange = { checked ->
-                        if (checked) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                val permissionCheck = ContextCompat.checkSelfPermission(
-                                    context,
-                                    android.Manifest.permission.POST_NOTIFICATIONS
-                                )
-                                if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
-                                    viewModel.setAlarmEnabled(true)
-                                    com.example.data.AlarmHelper.scheduleAlarm(context, alarmHour, alarmMinute)
-                                    Toast.makeText(context, "Erinnerung aktiviert!", Toast.LENGTH_SHORT).show()
-                                } else {
-                                    permissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-                                }
-                            } else {
-                                viewModel.setAlarmEnabled(true)
-                                com.example.data.AlarmHelper.scheduleAlarm(context, alarmHour, alarmMinute)
-                                Toast.makeText(context, "Erinnerung aktiviert!", Toast.LENGTH_SHORT).show()
-                            }
-                        } else {
-                            viewModel.setAlarmEnabled(false)
-                            com.example.data.AlarmHelper.cancelAlarm(context)
-                            Toast.makeText(context, "Erinnerung deaktiviert.", Toast.LENGTH_SHORT).show()
-                        }
-                    },
-                    modifier = Modifier.testTag("alarm_switch"),
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = Color.White,
-                        checkedTrackColor = Color(0xFF6750A4),
-                        uncheckedThumbColor = Color(0xFF49454F),
-                        uncheckedTrackColor = Color(0xFFE7E0EC)
-                    )
-                )
-            }
-
-            if (alarmEnabled) {
-                HorizontalDivider(color = Color(0xFFCAC4D0).copy(alpha = 0.3f))
-
-                // Time Selection Row
+                // Toggle Row
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            android.app.TimePickerDialog(
-                                context,
-                                { _, selectedHour, selectedMinute ->
-                                    viewModel.setAlarmTime(selectedHour, selectedMinute)
-                                    com.example.data.AlarmHelper.scheduleAlarm(context, selectedHour, selectedMinute)
-                                    Toast.makeText(context, "Erinnerung auf ${String.format("%02d:%02d", selectedHour, selectedMinute)} Uhr aktualisiert.", Toast.LENGTH_SHORT).show()
-                                },
-                                alarmHour,
-                                alarmMinute,
-                                true
-                            ).show()
-                        }
-                        .padding(vertical = 8.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.AccessTime,
-                            contentDescription = null,
-                            tint = Color(0xFF6750A4),
-                            modifier = Modifier.size(20.dp)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Erinnerung aktivieren",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface
                         )
-                        Column {
-                            Text(
-                                text = "Uhrzeit einstellen",
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Medium,
-                                color = Color(0xFF1D1B20)
-                            )
-                            Text(
-                                text = "Tippen zum Ändern",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = Color(0xFF49454F)
-                            )
-                        }
+                        Text(
+                            text = if (alarmEnabled) "Aktiviert für ${String.format("%02d:%02d", alarmHour, alarmMinute)} Uhr" else "Deaktiviert",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
 
-                    Text(
-                        text = "${String.format("%02d:%02d", alarmHour, alarmMinute)} Uhr",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF6750A4)
+                    Switch(
+                        checked = alarmEnabled,
+                        onCheckedChange = { checked ->
+                            if (checked) {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    val permissionCheck = ContextCompat.checkSelfPermission(
+                                        context,
+                                        android.Manifest.permission.POST_NOTIFICATIONS
+                                    )
+                                    if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+                                        viewModel.setAlarmEnabled(true)
+                                        com.example.data.AlarmHelper.scheduleAlarm(context, alarmHour, alarmMinute)
+                                        Toast.makeText(context, "Erinnerung aktiviert!", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        permissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                                    }
+                                } else {
+                                    viewModel.setAlarmEnabled(true)
+                                    com.example.data.AlarmHelper.scheduleAlarm(context, alarmHour, alarmMinute)
+                                    Toast.makeText(context, "Erinnerung aktiviert!", Toast.LENGTH_SHORT).show()
+                                }
+                            } else {
+                                viewModel.setAlarmEnabled(false)
+                                com.example.data.AlarmHelper.cancelAlarm(context)
+                                Toast.makeText(context, "Erinnerung deaktiviert.", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        modifier = Modifier.testTag("alarm_switch"),
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                            checkedTrackColor = MaterialTheme.colorScheme.primary,
+                            uncheckedThumbColor = MaterialTheme.colorScheme.outline,
+                            uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
+                        )
                     )
+                }
+
+                if (alarmEnabled) {
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), modifier = Modifier.padding(vertical = 4.dp))
+
+                    // Time Selection Row
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                android.app.TimePickerDialog(
+                                    context,
+                                    { _, selectedHour, selectedMinute ->
+                                        viewModel.setAlarmTime(selectedHour, selectedMinute)
+                                        com.example.data.AlarmHelper.scheduleAlarm(context, selectedHour, selectedMinute)
+                                        Toast.makeText(context, "Erinnerung auf ${String.format("%02d:%02d", selectedHour, selectedMinute)} Uhr aktualisiert.", Toast.LENGTH_SHORT).show()
+                                    },
+                                    alarmHour,
+                                    alarmMinute,
+                                    true
+                                ).show()
+                            }
+                            .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.AccessTime,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Column {
+                                Text(
+                                    text = "Uhrzeit einstellen",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = "Tippen zum Ändern",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+
+                        Text(
+                            text = "${String.format("%02d:%02d", alarmHour, alarmMinute)} Uhr",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ThemeSettingsCard(
+    viewModel: StepViewModel,
+    isExpanded: Boolean,
+    onToggle: () -> Unit
+) {
+    val currentVibe by viewModel.themeVibe.collectAsStateWithLifecycle()
+    val currentMode by viewModel.themeMode.collectAsStateWithLifecycle()
+
+    val vibesList = listOf(
+        Triple("standard", "Klassisch", "Klassischer Lavendelton"),
+        Triple("minimalist", "Minimal-Modern", "Stilvolles Schiefergrau"),
+        Triple("professional", "Business Pro", "Tiefblau & Vertrauenswürdig"),
+        Triple("playful", "Verspielt", "Sonniges Orange & Koralle"),
+        Triple("calm", "Naturruhe", "Beruhigendes Waldgrün & Salbei")
+    )
+
+    val modesList = listOf(
+        Triple("auto", "System", Icons.Default.Settings),
+        Triple("light", "Hell", Icons.Default.LightMode),
+        Triple("half_dark", "Halbdark", Icons.Default.DarkMode),
+        Triple("dark", "Tiefschwarz", Icons.Default.Contrast)
+    )
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag("theme_settings_card"),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Clickable Header
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onToggle() },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                shape = RoundedCornerShape(10.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Palette,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    Column {
+                        Text(
+                            text = "Design & Farbthema",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = if (isExpanded) "Aura, Farben & Hintergrund wählen" else "Vibe & Hintergrund einstellen",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                Icon(
+                    imageVector = if (isExpanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    contentDescription = if (isExpanded) "Schließen" else "Öffnen",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            if (isExpanded) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+
+                // Vibe Section
+                Text(
+                    text = "AURA & VIBE (AUSSTRAHLUNG)",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    vibesList.forEach { (vibeKey, name, desc) ->
+                        val isSelected = currentVibe == vibeKey
+                        
+                        val previewPrimary = when(vibeKey) {
+                            "minimalist" -> Color(0xFF0F172A)
+                            "professional" -> Color(0xFF1A365D)
+                            "playful" -> Color(0xFFE76F51)
+                            "calm" -> Color(0xFF2D6A4F)
+                            else -> Color(0xFF6750A4)
+                        }
+                        val previewSecondary = when(vibeKey) {
+                            "minimalist" -> Color(0xFF475569)
+                            "professional" -> Color(0xFF319795)
+                            "playful" -> Color(0xFFF4A261)
+                            "calm" -> Color(0xFF74C69D)
+                            else -> Color(0xFF625B71)
+                        }
+
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { viewModel.setThemeVibe(vibeKey) },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)
+                            ),
+                            border = BorderStroke(
+                                width = if (isSelected) 2.dp else 1.dp,
+                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                            )
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    // Color preview circle
+                                    Row(
+                                        modifier = Modifier
+                                            .width(42.dp)
+                                            .height(24.dp)
+                                            .background(Color.White.copy(alpha = 0.1f), RoundedCornerShape(12.dp))
+                                            .padding(2.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Box(modifier = Modifier.size(16.dp).background(previewPrimary, CircleShape))
+                                        Box(modifier = Modifier.size(16.dp).background(previewSecondary, CircleShape))
+                                    }
+                                    
+                                    Column {
+                                        Text(
+                                            text = name,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                            color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = desc,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+
+                                if (isSelected) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = "Ausgewählt",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(20.dp)
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f), modifier = Modifier.padding(vertical = 4.dp))
+
+                // Background Section
+                Text(
+                    text = "HINTERGRUND & HALBDARKMODUS",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    modesList.forEach { (modeKey, name, icon) ->
+                        val isSelected = currentMode == modeKey
+
+                        Card(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clickable { viewModel.setThemeMode(modeKey) },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)
+                            ),
+                            border = BorderStroke(
+                                width = if (isSelected) 2.dp else 1.dp,
+                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                            )
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 12.dp, horizontal = 4.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .background(
+                                            color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f) else Color.Transparent,
+                                            shape = CircleShape
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = icon,
+                                        contentDescription = name,
+                                        tint = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                }
+                                Text(
+                                    text = name,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
+                                    textAlign = TextAlign.Center,
+                                    fontSize = 11.sp
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

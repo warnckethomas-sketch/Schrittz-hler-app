@@ -116,6 +116,22 @@ class StepRepository(
         preferencesManager.alarmMinute = minute
     }
 
+    fun getThemeVibe(): String {
+        return preferencesManager.themeVibe
+    }
+
+    fun setThemeVibe(vibe: String) {
+        preferencesManager.themeVibe = vibe
+    }
+
+    fun getThemeMode(): String {
+        return preferencesManager.themeMode
+    }
+
+    fun setThemeMode(mode: String) {
+        preferencesManager.themeMode = mode
+    }
+
     suspend fun importBackupData(backupData: BackupData) {
         saveStepLength(backupData.stepLengthCm)
         backupData.entries.forEach { entry ->
