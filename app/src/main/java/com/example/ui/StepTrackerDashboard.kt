@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat
 import android.provider.DocumentsContract
 import android.widget.Toast
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import kotlinx.coroutines.launch
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -101,7 +102,7 @@ fun StepTrackerDashboard(
     var isBackupConfigExpanded by remember { mutableStateOf(false) }
     var isThemeConfigExpanded by remember { mutableStateOf(false) }
     var showExitConfirmationDialog by remember { mutableStateOf(false) }
-    var showPersonDropdown by remember { mutableStateOf(false) }
+    var showTopMenu by remember { mutableStateOf(false) }
     var showPrintPersonDialog by remember { mutableStateOf(false) }
     var pendingPrintPerson by remember { mutableStateOf<String?>(null) }
     var activeTab by remember { mutableStateOf(0) } // 0 = Dashboard, 1 = Historie & Backup
@@ -162,7 +163,7 @@ fun StepTrackerDashboard(
         )
     }
 
-    var activelyClickedDateStr by remember(activePeriodType, weeklyStats.mondayDateStr, monthlyStats.monthLabel) {
+    var activelyClickedDateStr by remember(activeTab, activePeriodType, weeklyStats.mondayDateStr, monthlyStats.monthLabel) {
         mutableStateOf<String?>(null)
     }
 
@@ -192,317 +193,365 @@ fun StepTrackerDashboard(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.background)
+                    .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.85f))
                     .statusBarsPadding()
-                    .padding(horizontal = 24.dp, vertical = 12.dp)
             ) {
-                // 1. Title & Description side-by-side in a Row with a background
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant // Dynamic Surface Color
-                    ),
-                    shape = RoundedCornerShape(14.dp)
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 14.dp, vertical = 10.dp)
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
+                    // 1. Title & Description side-by-side in a Row with a background
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.75f)
+                        ),
+                        shape = RoundedCornerShape(14.dp)
                     ) {
-                        Text(
-                            text = if (showStepLengthConfig) "Einstellungen" else if (activeTab == 0) "Schrittzähler" else "Historie",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 24.sp,
-                            letterSpacing = (-0.5).sp,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Icon(
-                            imageVector = if (showStepLengthConfig) Icons.Default.Settings else if (activeTab == 0) Icons.Default.DirectionsRun else Icons.Default.History,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(
-                            text = if (showStepLengthConfig) "Konfiguration & Sicherung" else if (activeTab == 0) "Erfassung & Auswertung" else "Verlauf & Sicherung",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontWeight = FontWeight.SemiBold,
-                            textAlign = TextAlign.Center
-                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
+                        ) {
+                            Text(
+                                text = if (showStepLengthConfig) "Einstellungen" else if (activeTab == 0) "Schrittzähler" else "Historie",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 24.sp,
+                                letterSpacing = (-0.5).sp,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Icon(
+                                imageVector = if (showStepLengthConfig) Icons.Default.Settings else if (activeTab == 0) Icons.Default.DirectionsRun else Icons.Default.History,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Text(
+                                text = if (showStepLengthConfig) "Konfiguration & Sicherung" else if (activeTab == 0) "Erfassung & Auswertung" else "Verlauf & Sicherung",
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontWeight = FontWeight.SemiBold,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
-                }
 
                 Spacer(modifier = Modifier.height(10.dp))
-
-                // 2. Navigation & Actions Icon Row centered under the Title block
+                // 2. Upper action row with Backup status on left and Menu dropdown on right
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    // Left: Navigation tabs
+                    // Left: Backup Status message with beautiful cloud indicators (weighted so it never overflows and pushes Menu)
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier
+                            .weight(1f, fill = false)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                            .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)), RoundedCornerShape(12.dp))
+                            .padding(horizontal = 8.dp, vertical = 6.dp)
                     ) {
-                        if (!showStepLengthConfig) {
-                            // Home / Dashboard Button
-                            IconButton(
-                                onClick = { activeTab = 0 },
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .testTag("tab_dashboard")
-                                    .clip(CircleShape)
-                                    .background(if (activeTab == 0) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Home,
-                                    contentDescription = "Dashboard",
-                                    tint = if (activeTab == 0) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
-
-                            // Historie Button
-                            IconButton(
-                                onClick = { activeTab = 1 },
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .testTag("tab_history")
-                                    .clip(CircleShape)
-                                    .background(if (activeTab == 1) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.History,
-                                    contentDescription = "Historie",
-                                    tint = if (activeTab == 1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
-                        } else {
-                            // In Settings Mode: Show a clear Return Button
-                            IconButton(
-                                onClick = { showStepLengthConfig = false; activeTab = 0 },
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .clip(CircleShape)
-                                    .background(Color.Transparent)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowBack,
-                                    contentDescription = "Zurück",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
-                        }
+                        Icon(
+                            imageVector = if (lastBackupTime == "Nie") Icons.Default.CloudQueue else Icons.Default.CloudDone,
+                            contentDescription = if (lastBackupTime == "Nie") "Keine Sicherung vorhanden" else "Sicherung erfolgreich",
+                            tint = if (lastBackupTime == "Nie") MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f) else MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(15.dp)
+                        )
+                        Text(
+                            text = if (lastBackupTime == "Nie") "Sicherung: Keine" else "Gesichert: ${if (lastBackupTime.contains(":")) lastBackupTime.substringBeforeLast(":") else lastBackupTime}",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = if (lastBackupTime == "Nie") MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary,
+                            fontSize = 11.sp,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                        )
                     }
 
-                    // Right: Settings Toggle & Custom Profile Initials
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        IconButton(
-                            onClick = {
-                                showStepLengthConfig = !showStepLengthConfig
-                                coroutineScope.launch {
-                                    listState.animateScrollToItem(0)
-                                }
-                            },
-                            modifier = Modifier
-                                .size(40.dp)
-                                .testTag("settings_gear_button")
-                                .clip(CircleShape)
-                                .background(if (showStepLengthConfig) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Settings,
-                                contentDescription = "Einstellungen",
-                                tint = if (showStepLengthConfig) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(22.dp)
-                            )
-                        }
-
-                        IconButton(
-                            onClick = {
-                                showPrintPersonDialog = true
-                            },
-                            modifier = Modifier
-                                .size(40.dp)
-                                .testTag("print_button")
-                                .clip(CircleShape)
-                                .background(Color.Transparent)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Print,
-                                contentDescription = "Monatliche Zusammenfassung drucken",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(22.dp)
-                            )
-                        }
-
-                        // Top Bar Person Selection Dropdown
-                        Box {
-                            IconButton(
-                                onClick = { showPersonDropdown = true },
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .testTag("appbar_person_select_button")
-                                    .clip(CircleShape)
-                                    .background(if (showPersonDropdown) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Person,
-                                    contentDescription = "Benutzer wechseln",
-                                    tint = if (showPersonDropdown) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
-
-                            DropdownMenu(
-                                expanded = showPersonDropdown,
-                                onDismissRequest = { showPersonDropdown = false },
-                                modifier = Modifier
-                                    .background(MaterialTheme.colorScheme.surface)
-                                    .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
-                            ) {
-                                val isP1 = selectedPerson == "person_1"
-                                DropdownMenuItem(
-                                    text = {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                        ) {
-                                            Icon(
-                                                imageVector = if (isP1) Icons.Default.CheckCircle else Icons.Default.Person,
-                                                contentDescription = null,
-                                                tint = if (isP1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                                modifier = Modifier.size(18.dp)
-                                            )
-                                            Text(
-                                                text = person1Name,
-                                                fontWeight = if (isP1) FontWeight.Bold else FontWeight.Medium,
-                                                color = if (isP1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
-                                                fontSize = 14.sp
-                                            )
-                                        }
-                                    },
-                                    onClick = {
-                                        viewModel.selectPerson("person_1")
-                                        showPersonDropdown = false
-                                    },
-                                    modifier = Modifier.testTag("dropdown_select_person_1")
-                                )
-
-                                val isP2 = selectedPerson == "person_2"
-                                DropdownMenuItem(
-                                    text = {
-                                        Row(
-                                            verticalAlignment = Alignment.CenterVertically,
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                        ) {
-                                            Icon(
-                                                imageVector = if (isP2) Icons.Default.CheckCircle else Icons.Default.Person,
-                                                contentDescription = null,
-                                                tint = if (isP2) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                                modifier = Modifier.size(18.dp)
-                                            )
-                                            Text(
-                                                text = person2Name,
-                                                fontWeight = if (isP2) FontWeight.Bold else FontWeight.Medium,
-                                                color = if (isP2) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
-                                                fontSize = 14.sp
-                                            )
-                                        }
-                                    },
-                                    onClick = {
-                                        viewModel.selectPerson("person_2")
-                                        showPersonDropdown = false
-                                    },
-                                    modifier = Modifier.testTag("dropdown_select_person_2")
-                                )
-                            }
-                        }
-
-                        IconButton(
-                            onClick = {
-                                showExitConfirmationDialog = true
-                            },
-                            modifier = Modifier
-                                .size(40.dp)
-                                .testTag("exit_button")
-                                .clip(CircleShape)
-                                .background(Color.Transparent)
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                                contentDescription = "App beenden",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(22.dp)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(4.dp))
-
-                        Surface(
-                            modifier = Modifier.size(38.dp),
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Text(
-                                    text = "TW", // Thomas Warncke
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    fontSize = 13.sp,
-                                    letterSpacing = 0.sp
-                                )
-                            }
-                        }
-                    }
-                }
-
-                // 3. Backup Status Area (Underneath the Icons as a distinct notification line)
-                if (activeTab == 0 && !showStepLengthConfig && lastBackupTime != "Nie") {
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
+                    // Right: Elegant Menu Button and Dropdown Menu
+                    Box {
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                                .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.15f)), RoundedCornerShape(12.dp))
+                                .clickable { showTopMenu = true }
+                                .padding(horizontal = 8.dp, vertical = 6.dp)
+                                .testTag("upper_menu_trigger_button")
                         ) {
+                            // User initials / Profile avatar
+                            Surface(
+                                modifier = Modifier.size(24.dp),
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(
+                                        text = "TW", // Thomas Warncke
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        fontSize = 10.sp,
+                                        letterSpacing = 0.sp
+                                    )
+                                }
+                            }
+
                             Icon(
-                                imageVector = Icons.Default.CloudDone,
-                                contentDescription = "Sicherung erfolgreich",
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Text(
-                                text = "Letzte Sicherung: $lastBackupTime",
-                                fontSize = 11.sp,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Medium
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = "Menü öffnen",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(18.dp)
                             )
                         }
+
+                        DropdownMenu(
+                            expanded = showTopMenu,
+                            onDismissRequest = { showTopMenu = false },
+                            modifier = Modifier
+                                .background(MaterialTheme.colorScheme.surface)
+                                .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)), RoundedCornerShape(12.dp))
+                        ) {
+                            // Current Active Person label or switch
+                            val isP1 = selectedPerson == "person_1"
+                            DropdownMenuItem(
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = if (isP1) Icons.Default.CheckCircle else Icons.Default.Person,
+                                        contentDescription = null,
+                                        tint = if (isP1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                },
+                                text = {
+                                    Text(
+                                        text = "Aktiv: $person1Name",
+                                        fontWeight = if (isP1) FontWeight.Bold else FontWeight.Medium,
+                                        color = if (isP1) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                    )
+                                },
+                                onClick = {
+                                    viewModel.selectPerson("person_1")
+                                    showTopMenu = false
+                                },
+                                modifier = Modifier.testTag("dropdown_menu_select_p1")
+                            )
+
+                            val isP2 = selectedPerson == "person_2"
+                            DropdownMenuItem(
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = if (isP2) Icons.Default.CheckCircle else Icons.Default.Person,
+                                        contentDescription = null,
+                                        tint = if (isP2) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                },
+                                text = {
+                                    Text(
+                                        text = "Aktiv: $person2Name",
+                                        fontWeight = if (isP2) FontWeight.Bold else FontWeight.Medium,
+                                        color = if (isP2) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                    )
+                                },
+                                onClick = {
+                                    viewModel.selectPerson("person_2")
+                                    showTopMenu = false
+                                },
+                                modifier = Modifier.testTag("dropdown_menu_select_p2")
+                            )
+
+                            HorizontalDivider(
+                                modifier = Modifier.padding(vertical = 4.dp),
+                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                            )
+
+                            DropdownMenuItem(
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Print,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                },
+                                text = {
+                                    Text(
+                                        text = "Zusammenfassung drucken",
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                },
+                                onClick = {
+                                    showPrintPersonDialog = true
+                                    showTopMenu = false
+                                },
+                                modifier = Modifier.testTag("dropdown_menu_print")
+                            )
+
+                            DropdownMenuItem(
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Settings,
+                                        contentDescription = null,
+                                        tint = if (showStepLengthConfig) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                },
+                                text = {
+                                    Text(
+                                        text = if (showStepLengthConfig) "Zurück zum Dashboard" else "Einstellungen",
+                                        fontWeight = if (showStepLengthConfig) FontWeight.Bold else FontWeight.Normal,
+                                        color = if (showStepLengthConfig) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                    )
+                                },
+                                onClick = {
+                                    showStepLengthConfig = !showStepLengthConfig
+                                    showTopMenu = false
+                                    if (showStepLengthConfig) {
+                                        coroutineScope.launch {
+                                            listState.animateScrollToItem(0)
+                                        }
+                                    }
+                                },
+                                modifier = Modifier.testTag("dropdown_menu_settings")
+                            )
+
+                            HorizontalDivider(
+                                modifier = Modifier.padding(vertical = 4.dp),
+                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                            )
+
+                            DropdownMenuItem(
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.error,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                },
+                                text = {
+                                    Text(
+                                        text = "App beenden",
+                                        color = MaterialTheme.colorScheme.error,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                },
+                                onClick = {
+                                    showExitConfirmationDialog = true
+                                    showTopMenu = false
+                                },
+                                modifier = Modifier.testTag("dropdown_menu_exit")
+                            )
+                        }
+                    }
+                } // Closes Row
+                } // Closes inner Column
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.45f)
+                )
+            }
+        },
+        bottomBar = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.85f))
+                    .navigationBarsPadding()
+            ) {
+                HorizontalDivider(
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.45f)
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val isDashboardActive = activeTab == 0 && !showStepLengthConfig
+                    IconButton(
+                        onClick = {
+                            activeTab = 0
+                            showStepLengthConfig = false
+                        },
+                        modifier = Modifier
+                            .size(52.dp)
+                            .clip(CircleShape)
+                            .background(if (isDashboardActive) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Home,
+                            contentDescription = "Dashboard",
+                            tint = if (isDashboardActive) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
+                            modifier = Modifier.size(26.dp)
+                        )
+                    }
+
+                    FloatingActionButton(
+                        onClick = {
+                            dialogInitialDate = DateUtils.getTodayString()
+                            dialogInitialSteps = ""
+                            showAddDialog = true
+                        },
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        shape = CircleShape,
+                        modifier = Modifier
+                            .size(56.dp)
+                            .testTag("bottom_manual_add_steps_button")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Schritte erfassen",
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+
+                    val isHistoryActive = activeTab == 1 && !showStepLengthConfig
+                    IconButton(
+                        onClick = {
+                            activeTab = 1
+                            showStepLengthConfig = false
+                        },
+                        modifier = Modifier
+                            .size(52.dp)
+                            .clip(CircleShape)
+                            .background(if (isHistoryActive) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.History,
+                            contentDescription = "Historie",
+                            tint = if (isHistoryActive) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
+                            modifier = Modifier.size(26.dp)
+                        )
                     }
                 }
             }
         }
     ) { innerPadding ->
-        LazyColumn(
-            state = listState,
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    activelyClickedDateStr = null
+                }
+        ) {
+            LazyColumn(
+                state = listState,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = innerPadding.calculateTopPadding())
@@ -763,38 +812,7 @@ fun StepTrackerDashboard(
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            // PERIOD SELECTION SEGMENTED SWITCH
-            item {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .padding(4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
-                    listOf(PeriodType.WEEK to "Woche", PeriodType.MONTH to "Monat").forEach { (type, label) ->
-                        val isSelected = type == activePeriodType
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
-                                .clickable { viewModel.setPeriodType(type) }
-                                .padding(vertical = 10.dp)
-                                .testTag("period_tab_${type.name.lowercase()}"),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = label,
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-            }
+
 
             // PERIOD NAVIGATION HEADER
             item {
@@ -857,43 +875,85 @@ fun StepTrackerDashboard(
 
                         Spacer(modifier = Modifier.height(14.dp))
 
-                        // Inline Person Switcher with theme-adaptive border and stylish layout
+                        // Unified Switcher Deck: Side-by-side selectors for Person and Period with custom theme mapping
                         Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
-                                .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)), RoundedCornerShape(12.dp))
-                                .padding(4.dp),
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            listOf("person_1" to person1Name, "person_2" to person2Name).forEach { (personId, name) ->
-                                val isSelected = personId == selectedPerson
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .clip(RoundedCornerShape(8.dp))
-                                        .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
-                                        .clickable { viewModel.selectPerson(personId) }
-                                        .padding(vertical = 10.dp)
-                                        .testTag("activity_chart_person_tab_$personId"),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            // 1. Person Selector with custom distinct colors (Person 1 -> Primary, Person 2 -> Secondary)
+                            Row(
+                                modifier = Modifier
+                                    .weight(1.2f)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                                    .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)), RoundedCornerShape(12.dp))
+                                    .padding(4.dp),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                listOf("person_1" to person1Name, "person_2" to person2Name).forEach { (personId, name) ->
+                                    val isSelected = personId == selectedPerson
+                                    val activeColor = if (personId == "person_1") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                                    val onActiveColor = if (personId == "person_1") MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(if (isSelected) activeColor else Color.Transparent)
+                                            .clickable { viewModel.selectPerson(personId) }
+                                            .padding(vertical = 8.dp)
+                                            .testTag("activity_chart_person_tab_$personId"),
+                                        contentAlignment = Alignment.Center
                                     ) {
-                                        Icon(
-                                            imageVector = if (isSelected) Icons.Default.CheckCircle else Icons.Default.Person,
-                                            contentDescription = if (isSelected) "Ausgewählter Benutzer: $name" else "Zu $name wechseln",
-                                            tint = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier.size(16.dp)
-                                        )
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = if (isSelected) Icons.Default.CheckCircle else Icons.Default.Person,
+                                                contentDescription = null,
+                                                tint = if (isSelected) onActiveColor else MaterialTheme.colorScheme.onSurfaceVariant,
+                                                modifier = Modifier.size(14.dp)
+                                            )
+                                            Text(
+                                                text = name,
+                                                style = MaterialTheme.typography.bodySmall,
+                                                fontWeight = FontWeight.Bold,
+                                                color = if (isSelected) onActiveColor else MaterialTheme.colorScheme.onSurfaceVariant,
+                                                maxLines = 1
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            // 2. Period Selector (Woche vs Monat)
+                            Row(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+                                    .border(BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)), RoundedCornerShape(12.dp))
+                                    .padding(4.dp),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                listOf(PeriodType.WEEK to "Woche", PeriodType.MONTH to "Monat").forEach { (type, label) ->
+                                    val isSelected = type == activePeriodType
+                                    Box(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clip(RoundedCornerShape(8.dp))
+                                            .background(if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent)
+                                            .clickable { viewModel.setPeriodType(type) }
+                                            .padding(vertical = 8.dp)
+                                            .testTag("activity_chart_period_tab_${type.name.lowercase()}"),
+                                        contentAlignment = Alignment.Center
+                                    ) {
                                         Text(
-                                            text = name,
-                                            style = MaterialTheme.typography.bodyMedium,
+                                            text = label,
+                                            style = MaterialTheme.typography.bodySmall,
                                             fontWeight = FontWeight.Bold,
-                                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 1
                                         )
                                     }
                                 }
@@ -1176,13 +1236,13 @@ fun StepTrackerDashboard(
                                 text = "Historie",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF1D1B20)
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 text = if (selectedPerson == "person_2") person2Name else person1Name,
                                 style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.Medium,
-                                color = Color(0xFF6750A4)
+                                color = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
@@ -1222,13 +1282,13 @@ fun StepTrackerDashboard(
                                 text = "Historie",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF1D1B20)
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 text = if (selectedPerson == "person_2") person2Name else person1Name,
                                 style = MaterialTheme.typography.bodySmall,
                                 fontWeight = FontWeight.Medium,
-                                color = Color(0xFF6750A4)
+                                color = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
@@ -1257,7 +1317,7 @@ fun StepTrackerDashboard(
                             Text(
                                 text = "Keine Einträge für ${if (selectedPerson == "person_2") person2Name else person1Name} vorhanden.",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color(0xFF49454F)
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -1273,12 +1333,12 @@ fun StepTrackerDashboard(
                         ) {
                             Button(
                                 onClick = { visibleMonthsLimit++ },
-                                shape = RoundedCornerShape(16.dp),
+                                shape = RoundedCornerShape(14.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color(0xFFEADDFF).copy(alpha = 0.8f),
-                                    contentColor = Color(0xFF21005D)
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                                 ),
-                                border = BorderStroke(1.dp, Color(0xFF6750A4).copy(alpha = 0.2f)),
+                                border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .testTag("load_more_entries_btn")
@@ -1303,6 +1363,7 @@ fun StepTrackerDashboard(
                     }
                 }
             }
+            } // end of Box wrapping LazyColumn
         }
     }
 }
@@ -2185,7 +2246,7 @@ fun MonthlyBarGraph(
                                 Icon(
                                     imageVector = Icons.Default.ChatBubble,
                                     contentDescription = "Notiz von aktiver Person vorhanden",
-                                    tint = Color(0xFF6750A4),
+                                    tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(7.dp)
                                 )
                             }
@@ -2193,7 +2254,7 @@ fun MonthlyBarGraph(
                                 Icon(
                                     imageVector = Icons.Default.ChatBubble,
                                     contentDescription = "Notiz von inaktiver Person vorhanden",
-                                    tint = Color(0xFFCCC9D2),
+                                    tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
                                     modifier = Modifier.size(7.dp)
                                 )
                             }
@@ -2688,6 +2749,7 @@ fun LogItemRow(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StepEntryDialog(
     initialDateStr: String,
@@ -2705,6 +2767,7 @@ fun StepEntryDialog(
     var remarkField by remember { mutableStateOf(initialRemarkStr) }
     var chosenPerson by remember { mutableStateOf(selectedPerson) }
     var showErrorMsg by remember { mutableStateOf("") }
+    var showComposeDatePicker by remember { mutableStateOf(false) }
 
     val formattedGermanDate = remember(dateStr) {
         DateUtils.formatGermanDate(dateStr)
@@ -2815,30 +2878,7 @@ fun StepEntryDialog(
                 // DATE PICKER FIELD
                 OutlinedButton(
                     onClick = {
-                        val cal = Calendar.getInstance()
-                        try {
-                            val parts = dateStr.split("-")
-                            if (parts.size == 3) {
-                                cal.set(Calendar.YEAR, parts[0].toInt())
-                                cal.set(Calendar.MONTH, parts[1].toInt() - 1)
-                                cal.set(Calendar.DAY_OF_MONTH, parts[2].toInt())
-                            }
-                        } catch (e: Exception) {
-                            // fallback
-                        }
-
-                        DatePickerDialog(
-                            context,
-                            { _, y, m, d ->
-                                val monthAdjusted = m + 1
-                                val monthPadded = if (monthAdjusted < 10) "0$monthAdjusted" else "$monthAdjusted"
-                                val dayPadded = if (d < 10) "0$d" else "$d"
-                                dateStr = "$y-$monthPadded-$dayPadded"
-                            },
-                            cal.get(Calendar.YEAR),
-                            cal.get(Calendar.MONTH),
-                            cal.get(Calendar.DAY_OF_MONTH)
-                        ).show()
+                        showComposeDatePicker = true
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -3018,6 +3058,78 @@ fun StepEntryDialog(
             }
         }
     )
+
+    if (showComposeDatePicker) {
+        val initialMs = remember(dateStr) {
+            try {
+                val parts = dateStr.split("-")
+                if (parts.size == 3) {
+                    val cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+                    cal.clear()
+                    cal.set(parts[0].toInt(), parts[1].toInt() - 1, parts[2].toInt())
+                    cal.timeInMillis
+                } else {
+                    System.currentTimeMillis()
+                }
+            } catch (e: Exception) {
+                System.currentTimeMillis()
+            }
+        }
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = initialMs
+        )
+        
+        DatePickerDialog(
+            onDismissRequest = { showComposeDatePicker = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        datePickerState.selectedDateMillis?.let { ms ->
+                            val cal = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+                            cal.timeInMillis = ms
+                            val y = cal.get(Calendar.YEAR)
+                            val m = cal.get(Calendar.MONTH) + 1
+                            val d = cal.get(Calendar.DAY_OF_MONTH)
+                            val monthPadded = if (m < 10) "0$m" else "$m"
+                            val dayPadded = if (d < 10) "0$d" else "$d"
+                            dateStr = "$y-$monthPadded-$dayPadded"
+                        }
+                        showComposeDatePicker = false
+                    }
+                ) {
+                    Text("OK", fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showComposeDatePicker = false }) {
+                    Text("Abbrechen")
+                }
+            },
+            colors = DatePickerDefaults.colors(
+                containerColor = MaterialTheme.colorScheme.surface
+            )
+        ) {
+            DatePicker(
+                state = datePickerState,
+                colors = DatePickerDefaults.colors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    headlineContentColor = MaterialTheme.colorScheme.onSurface,
+                    weekdayContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    subheadContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    navigationContentColor = MaterialTheme.colorScheme.primary,
+                    yearContentColor = MaterialTheme.colorScheme.onSurface,
+                    selectedYearContentColor = MaterialTheme.colorScheme.onPrimary,
+                    selectedYearContainerColor = MaterialTheme.colorScheme.primary,
+                    dayContentColor = MaterialTheme.colorScheme.onSurface,
+                    selectedDayContentColor = MaterialTheme.colorScheme.onPrimary,
+                    selectedDayContainerColor = MaterialTheme.colorScheme.primary,
+                    todayContentColor = MaterialTheme.colorScheme.primary,
+                    todayDateBorderColor = MaterialTheme.colorScheme.primary
+                )
+            )
+        }
+    }
 }
 
 fun getFolderDisplayNameSafe(context: android.content.Context, uriString: String): String {
