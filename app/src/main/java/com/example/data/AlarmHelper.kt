@@ -10,6 +10,7 @@ import java.util.Calendar
 
 object AlarmHelper {
     private const val ALARM_REQ_CODE = 4001
+    private const val ALARM_RETRY_REQ_CODE = 4002
 
     fun scheduleAlarm(context: Context, hour: Int, minute: Int) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
@@ -60,6 +61,61 @@ object AlarmHelper {
         }
     }
 
+    fun scheduleRetryAlarm(context: Context) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
+        val intent = Intent(context, AlarmReceiver::class.java).apply {
+            putExtra("is_retry", true)
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            ALARM_RETRY_REQ_CODE,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        // 10 minutes in milliseconds
+        val triggerTime = System.currentTimeMillis() + 10 * 60 * 1000
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    triggerTime,
+                    pendingIntent
+                )
+            } else {
+                alarmManager.setExact(
+                    AlarmManager.RTC_WAKEUP,
+                    triggerTime,
+                    pendingIntent
+                )
+            }
+            Log.d("AlarmHelper", "Retry alarm scheduled in 10 minutes.")
+        } catch (e: Exception) {
+            alarmManager.set(
+                AlarmManager.RTC_WAKEUP,
+                triggerTime,
+                pendingIntent
+            )
+            Log.w("AlarmHelper", "Failed to set exact retry alarm: ${e.message}")
+        }
+    }
+
+    fun cancelRetryAlarm(context: Context) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
+        val intent = Intent(context, AlarmReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            ALARM_RETRY_REQ_CODE,
+            intent,
+            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+        )
+        if (pendingIntent != null) {
+            alarmManager.cancel(pendingIntent)
+            pendingIntent.cancel()
+            Log.d("AlarmHelper", "Retry alarm cancelled successfully.")
+        }
+    }
+
     fun cancelAlarm(context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
         val intent = Intent(context, AlarmReceiver::class.java)
@@ -74,5 +130,6 @@ object AlarmHelper {
             pendingIntent.cancel()
             Log.d("AlarmHelper", "Alarm cancelled successfully.")
         }
+        cancelRetryAlarm(context)
     }
 }

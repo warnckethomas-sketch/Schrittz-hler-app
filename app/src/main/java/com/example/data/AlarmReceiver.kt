@@ -19,11 +19,16 @@ class AlarmReceiver : BroadcastReceiver() {
         
         // If alarm is disabled, do nothing
         if (!preferencesManager.alarmEnabled) {
+            AlarmHelper.cancelRetryAlarm(context)
             return
         }
 
-        // Reschedule alarm for the next day
-        AlarmHelper.scheduleAlarm(context, preferencesManager.alarmHour, preferencesManager.alarmMinute)
+        val isRetry = intent.getBooleanExtra("is_retry", false)
+
+        // Reschedule daily alarm for the next day ONLY if it is the normal daily alarm
+        if (!isRetry) {
+            AlarmHelper.scheduleAlarm(context, preferencesManager.alarmHour, preferencesManager.alarmMinute)
+        }
 
         val todayDateStr = DateUtils.getTodayString()
         val p1Key = todayDateStr
@@ -47,8 +52,9 @@ class AlarmReceiver : BroadcastReceiver() {
             }
         }
 
-        // If both have entries, do not trigger a notification
+        // If both have entries, do not trigger a notification, cancel any retry and return
         if (!p1Missing && !p2Missing) {
+            AlarmHelper.cancelRetryAlarm(context)
             return
         }
 
@@ -63,6 +69,9 @@ class AlarmReceiver : BroadcastReceiver() {
         }
 
         triggerNotification(context, title, message)
+
+        // Schedule/reschedule retry alarm in 10 minutes
+        AlarmHelper.scheduleRetryAlarm(context)
     }
 
     private fun triggerNotification(context: Context, title: String, message: String) {

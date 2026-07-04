@@ -563,6 +563,25 @@ fun StepTrackerDashboard(
             if (showStepLengthConfig) {
                 item {
                     Column(
+                        modifier = Modifier.padding(top = 8.dp)
+                    ) {
+                        Text(
+                            text = "Einstellungen",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = if (selectedPerson == "person_2") person2Name else person1Name,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+
+                item {
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 8.dp),
@@ -630,6 +649,24 @@ fun StepTrackerDashboard(
                 }
             } else {
                 if (activeTab == 0) {
+                    item {
+                        Column(
+                            modifier = Modifier.padding(top = 8.dp)
+                        ) {
+                            Text(
+                                text = "Schrittzähler",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                text = if (selectedPerson == "person_2") person2Name else person1Name,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
 
             // TODAY LOGGING CTA CARD: Gorgeous banner styled dynamically based on active person's today entry
             item {
@@ -1227,26 +1264,26 @@ fun StepTrackerDashboard(
                     !visibleMonthPrefixes.contains(day.dateStr.take(7))
                 }
 
-                if (visibleHistoryDays.isNotEmpty()) {
-                    item {
-                        Column(
-                            modifier = Modifier.padding(top = 8.dp)
-                        ) {
-                            Text(
-                                text = "Historie",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = if (selectedPerson == "person_2") person2Name else person1Name,
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
+                item {
+                    Column(
+                        modifier = Modifier.padding(top = 8.dp)
+                    ) {
+                        Text(
+                            text = "Historie",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = if (selectedPerson == "person_2") person2Name else person1Name,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     }
+                }
 
+                if (visibleHistoryDays.isNotEmpty()) {
                     item {
                         Column(
                             modifier = Modifier
@@ -1274,24 +1311,6 @@ fun StepTrackerDashboard(
                         }
                     }
                 } else if (historyDays.isNotEmpty()) {
-                    item {
-                        Column(
-                            modifier = Modifier.padding(top = 8.dp)
-                        ) {
-                            Text(
-                                text = "Historie",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Text(
-                                text = if (selectedPerson == "person_2") person2Name else person1Name,
-                                style = MaterialTheme.typography.bodySmall,
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
                     item {
                         Box(
                             modifier = Modifier

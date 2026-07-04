@@ -1,15 +1,23 @@
 package com.example.data
 
+import android.content.Context
 import kotlinx.coroutines.flow.Flow
 
 class StepRepository(
     private val stepDao: StepDao,
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
+    private val context: Context
 ) {
     val allEntries: Flow<List<StepEntry>> = stepDao.getAllEntriesFlow()
 
     suspend fun insertOrUpdate(date: String, steps: Int, remark: String = "") {
         stepDao.insertOrUpdate(StepEntry(date = date, steps = steps, remark = remark))
+        
+        // If the entry being added/updated is for today, cancel the 10-minute retry alarm
+        val todayStr = com.example.ui.DateUtils.getTodayString()
+        if (date == todayStr || date == "person_2|$todayStr") {
+            AlarmHelper.cancelRetryAlarm(context)
+        }
     }
 
     suspend fun deleteByDate(date: String) {

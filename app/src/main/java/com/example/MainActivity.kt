@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
         // Initialize Core Dependencies
         val database = StepDatabase.getDatabase(applicationContext)
         val preferencesManager = PreferencesManager(applicationContext)
-        val repository = StepRepository(database.stepDao(), preferencesManager)
+        val repository = StepRepository(database.stepDao(), preferencesManager, applicationContext)
         
         // Initialize ViewModel via factory
         val factory = StepViewModelFactory(repository)
