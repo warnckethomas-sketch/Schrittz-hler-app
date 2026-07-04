@@ -217,7 +217,7 @@ fun StepTrackerDashboard(
                             horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
                         ) {
                             Text(
-                                text = if (showStepLengthConfig) "Einstellungen" else if (activeTab == 0) "Schrittzähler" else "Historie",
+                                text = if (showStepLengthConfig) "Einstellungen" else if (activeTab == 0) "Erfassung" else "Historie",
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 24.sp,
                                 letterSpacing = (-0.5).sp,
@@ -557,7 +557,7 @@ fun StepTrackerDashboard(
                 .padding(top = innerPadding.calculateTopPadding())
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(bottom = innerPadding.calculateBottomPadding() + 96.dp)
+            contentPadding = PaddingValues(bottom = innerPadding.calculateBottomPadding() + 16.dp)
         ) {
             // SETTINGS & BACKUP AREA (shown when gear/settings is toggled)
             if (showStepLengthConfig) {
@@ -654,7 +654,7 @@ fun StepTrackerDashboard(
                             modifier = Modifier.padding(top = 8.dp)
                         ) {
                             Text(
-                                text = "Schrittzähler",
+                                text = "Erfassung",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
@@ -872,7 +872,11 @@ fun StepTrackerDashboard(
                         }
                     },
                     onCurrent = {
-                        viewModel.navigateToCurrentWeek()
+                        if (activePeriodType == PeriodType.WEEK) {
+                            viewModel.navigateToCurrentWeek()
+                        } else {
+                            viewModel.navigateToCurrentMonth()
+                        }
                     }
                 )
             }

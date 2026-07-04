@@ -804,6 +804,10 @@ class StepViewModel(private val repository: StepRepository) : ViewModel() {
         _selectedWeekMonday.value = DateUtils.getMondayOfWeek(DateUtils.getTodayString())
     }
 
+    fun navigateToCurrentMonth() {
+        _selectedWeekMonday.value = DateUtils.getMondayOfCurrentMonth()
+    }
+
     fun updateStepLength(cm: Int) {
         if (cm in 1..300) {
             if (_selectedPerson.value == "person_2") {
@@ -969,6 +973,19 @@ object DateUtils {
 
     fun getTodayString(): String {
         return getDateFormat().format(Date())
+    }
+
+    fun getMondayOfCurrentMonth(): String {
+        val sdf = getDateFormat()
+        return try {
+            val cal = Calendar.getInstance(Locale.GERMANY)
+            cal.time = Date()
+            cal.set(Calendar.DAY_OF_MONTH, 15)
+            val midMonthStr = sdf.format(cal.time)
+            getMondayOfWeek(midMonthStr)
+        } catch (e: Exception) {
+            getTodayString()
+        }
     }
 
     fun getMondayOfWeek(dateStr: String): String {
