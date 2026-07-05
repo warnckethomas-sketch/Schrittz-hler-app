@@ -35,9 +35,21 @@ object AlarmHelper {
             }
         }
 
+        val canScheduleExact = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            alarmManager.canScheduleExactAlarms()
+        } else {
+            true
+        }
+
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (canScheduleExact && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    calendar.timeInMillis,
+                    pendingIntent
+                )
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
                     calendar.timeInMillis,
                     pendingIntent
@@ -49,15 +61,23 @@ object AlarmHelper {
                     pendingIntent
                 )
             }
-            Log.d("AlarmHelper", "Alarm scheduled for ${calendar.time} (Hour: $hour, Minute: $minute)")
+            Log.d("AlarmHelper", "Alarm scheduled for ${calendar.time} (Hour: $hour, Minute: $minute), canScheduleExact: $canScheduleExact")
         } catch (e: Exception) {
-            // Fallback to inexact alarm if exact alarm permissions are restricted on Android 14+
-            alarmManager.set(
-                AlarmManager.RTC_WAKEUP,
-                calendar.timeInMillis,
-                pendingIntent
-            )
-            Log.w("AlarmHelper", "Failed to set exact alarm, falling back to standard: ${e.message}")
+            // Safe fallback to allow-while-idle if permission gets revoked dynamically or on Android 14+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    calendar.timeInMillis,
+                    pendingIntent
+                )
+            } else {
+                alarmManager.set(
+                    AlarmManager.RTC_WAKEUP,
+                    calendar.timeInMillis,
+                    pendingIntent
+                )
+            }
+            Log.w("AlarmHelper", "Failed to set exact alarm, falling back to allow-while-idle: ${e.message}")
         }
     }
 
@@ -75,9 +95,21 @@ object AlarmHelper {
         // 10 minutes in milliseconds
         val triggerTime = System.currentTimeMillis() + 10 * 60 * 1000
 
+        val canScheduleExact = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            alarmManager.canScheduleExactAlarms()
+        } else {
+            true
+        }
+
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (canScheduleExact && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 alarmManager.setExactAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    triggerTime,
+                    pendingIntent
+                )
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
                     triggerTime,
                     pendingIntent
@@ -89,14 +121,22 @@ object AlarmHelper {
                     pendingIntent
                 )
             }
-            Log.d("AlarmHelper", "Retry alarm scheduled in 10 minutes.")
+            Log.d("AlarmHelper", "Retry alarm scheduled in 10 minutes, canScheduleExact: $canScheduleExact")
         } catch (e: Exception) {
-            alarmManager.set(
-                AlarmManager.RTC_WAKEUP,
-                triggerTime,
-                pendingIntent
-            )
-            Log.w("AlarmHelper", "Failed to set exact retry alarm: ${e.message}")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setAndAllowWhileIdle(
+                    AlarmManager.RTC_WAKEUP,
+                    triggerTime,
+                    pendingIntent
+                )
+            } else {
+                alarmManager.set(
+                    AlarmManager.RTC_WAKEUP,
+                    triggerTime,
+                    pendingIntent
+                )
+            }
+            Log.w("AlarmHelper", "Failed to set exact retry alarm, falling back to allow-while-idle: ${e.message}")
         }
     }
 

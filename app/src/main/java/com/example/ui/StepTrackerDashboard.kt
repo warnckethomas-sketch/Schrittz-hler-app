@@ -62,6 +62,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.R
@@ -88,6 +90,15 @@ fun StepTrackerDashboard(
     val selectedPerson by viewModel.selectedPerson.collectAsStateWithLifecycle()
     val person1Name by viewModel.person1Name.collectAsStateWithLifecycle()
     val person2Name by viewModel.person2Name.collectAsStateWithLifecycle()
+    val initials = remember(selectedPerson, person1Name, person2Name) {
+        val name = if (selectedPerson == "person_2") person2Name else person1Name
+        val parts = name.trim().split(Regex("\\s+")).filter { it.isNotEmpty() }
+        if (parts.isEmpty()) {
+            if (selectedPerson == "person_2") "P2" else "TW"
+        } else {
+            parts.map { it.first().uppercase() }.joinToString("").take(3)
+        }
+    }
     val stepLengthCmPerson1 by viewModel.stepLengthCmPerson1.collectAsStateWithLifecycle()
     val stepLengthCmPerson2 by viewModel.stepLengthCmPerson2.collectAsStateWithLifecycle()
 
@@ -126,9 +137,14 @@ fun StepTrackerDashboard(
         }
     }
 
-    LaunchedEffect(activeTab) {
-        if (activeTab == 0) {
+    LaunchedEffect(activeTab, showStepLengthConfig) {
+        if (activeTab == 0 && !showStepLengthConfig) {
             visibleMonthsLimit = 1
+            try {
+                listState.animateScrollToItem(0)
+            } catch (e: Exception) {
+                // ignore
+            }
         }
     }
 
@@ -296,7 +312,7 @@ fun StepTrackerDashboard(
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Text(
-                                        text = "TW", // Thomas Warncke
+                                        text = initials,
                                         fontWeight = FontWeight.Bold,
                                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                                         fontSize = 10.sp,
@@ -484,6 +500,11 @@ fun StepTrackerDashboard(
                         onClick = {
                             activeTab = 0
                             showStepLengthConfig = false
+                            coroutineScope.launch {
+                                try {
+                                    listState.animateScrollToItem(0)
+                                } catch (e: Exception) {}
+                            }
                         },
                         modifier = Modifier
                             .size(52.dp)
@@ -2796,291 +2817,320 @@ fun StepEntryDialog(
         DateUtils.formatGermanDate(dateStr)
     }
 
-    AlertDialog(
+    Dialog(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
-        titleContentColor = MaterialTheme.colorScheme.onSurface,
-        textContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-        title = {
-            Text(
-                text = if (initialStepsStr.isEmpty()) "Schritte erfassen" else "Eintrag bearbeiten",
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        },
-        text = {
-            Column(
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp, vertical = 24.dp)
+                .clickable(
+                    onClick = onDismiss,
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ),
+            contentAlignment = Alignment.TopCenter
+        ) {
+            Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .clickable(
+                        enabled = true,
+                        onClick = {},
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ),
+                shape = RoundedCornerShape(28.dp),
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 6.dp
             ) {
-                // PERSON SELECTION
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                    modifier = Modifier.padding(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text(
-                        text = "Person auswählen",
-                        style = MaterialTheme.typography.bodySmall,
+                        text = if (initialStepsStr.isEmpty()) "Schritte erfassen" else "Eintrag bearbeiten",
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
-                        letterSpacing = 0.5.sp
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        val isP1 = chosenPerson == "person_1"
-                        val isP2 = chosenPerson == "person_2"
-                        
-                        Button(
-                            onClick = { chosenPerson = "person_1" },
-                            modifier = Modifier.weight(1f).height(44.dp).testTag("dialog_select_person_1"),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isP1) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
-                                contentColor = if (isP1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
-                            ),
-                            border = if (isP1) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                            contentPadding = PaddingValues(horizontal = 8.dp)
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                Icon(
-                                    imageVector = if (isP1) Icons.Default.CheckCircle else Icons.Default.Person,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Text(
-                                    text = person1Name,
-                                    fontWeight = if (isP1) FontWeight.Bold else FontWeight.Medium,
-                                    fontSize = 12.sp,
-                                    textAlign = TextAlign.Center,
-                                    maxLines = 1,
-                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                                )
-                            }
-                        }
 
-                        Button(
-                            onClick = { chosenPerson = "person_2" },
-                            modifier = Modifier.weight(1f).height(44.dp).testTag("dialog_select_person_2"),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isP2) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
-                                contentColor = if (isP2) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
-                            ),
-                            border = if (isP2) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                            contentPadding = PaddingValues(horizontal = 8.dp)
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                Icon(
-                                    imageVector = if (isP2) Icons.Default.CheckCircle else Icons.Default.Person,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Text(
-                                    text = person2Name,
-                                    fontWeight = if (isP2) FontWeight.Bold else FontWeight.Medium,
-                                    fontSize = 12.sp,
-                                    textAlign = TextAlign.Center,
-                                    maxLines = 1,
-                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                                )
-                            }
-                        }
-                    }
-                }
-
-                // DATE PICKER FIELD
-                OutlinedButton(
-                    onClick = {
-                        showComposeDatePicker = true
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                        .testTag("dialog_date_select"),
-                    shape = RoundedCornerShape(12.dp),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
-                ) {
-                    Row(
+                    Column(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Icon(Icons.Default.CalendarToday, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        // PERSON SELECTION
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
                             Text(
-                                text = "Datum: $formattedGermanDate",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface
+                                text = "Person auswählen",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary,
+                                letterSpacing = 0.5.sp
+                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                val isP1 = chosenPerson == "person_1"
+                                val isP2 = chosenPerson == "person_2"
+                                
+                                Button(
+                                    onClick = { chosenPerson = "person_1" },
+                                    modifier = Modifier.weight(1f).height(44.dp).testTag("dialog_select_person_1"),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = if (isP1) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+                                        contentColor = if (isP1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                                    ),
+                                    border = if (isP1) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                                    contentPadding = PaddingValues(horizontal = 8.dp)
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = if (isP1) Icons.Default.CheckCircle else Icons.Default.Person,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Text(
+                                            text = person1Name,
+                                            fontWeight = if (isP1) FontWeight.Bold else FontWeight.Medium,
+                                            fontSize = 12.sp,
+                                            textAlign = TextAlign.Center,
+                                            maxLines = 1,
+                                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                        )
+                                    }
+                                }
+
+                                Button(
+                                    onClick = { chosenPerson = "person_2" },
+                                    modifier = Modifier.weight(1f).height(44.dp).testTag("dialog_select_person_2"),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = if (isP2) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+                                        contentColor = if (isP2) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                                    ),
+                                    border = if (isP2) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                                    contentPadding = PaddingValues(horizontal = 8.dp)
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = if (isP2) Icons.Default.CheckCircle else Icons.Default.Person,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Text(
+                                            text = person2Name,
+                                            fontWeight = if (isP2) FontWeight.Bold else FontWeight.Medium,
+                                            fontSize = 12.sp,
+                                            textAlign = TextAlign.Center,
+                                            maxLines = 1,
+                                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // DATE PICKER FIELD
+                        OutlinedButton(
+                            onClick = {
+                                showComposeDatePicker = true
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(56.dp)
+                                .testTag("dialog_date_select"),
+                            shape = RoundedCornerShape(12.dp),
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Icon(Icons.Default.CalendarToday, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                    Text(
+                                        text = "Datum: $formattedGermanDate",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+                                Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            }
+                        }
+
+                        // STEPS COUNT FIELD
+                        OutlinedTextField(
+                            value = stepsField,
+                            onValueChange = { input ->
+                                if (input.all { it.isDigit() }) {
+                                    stepsField = input
+                                }
+                            },
+                            label = { Text("Schritte") },
+                            placeholder = { Text("z.B. 10000") },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                                unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                                cursorColor = MaterialTheme.colorScheme.primary
+                            ),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("dialog_steps_input"),
+                            leadingIcon = {
+                                Icon(Icons.Default.DirectionsRun, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            },
+                            trailingIcon = {
+                                if (stepsField.isNotEmpty()) {
+                                    IconButton(onClick = { stepsField = "" }) {
+                                          Icon(Icons.Default.Clear, contentDescription = "Eingabe löschen", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    }
+                                }
+                            }
+                        )
+
+                        // REMARK FIELD
+                        OutlinedTextField(
+                            value = remarkField,
+                            onValueChange = { remarkField = it },
+                            label = { Text("Bemerkung") },
+                            placeholder = { Text("z.B. Abendspaziergang") },
+                            singleLine = true,
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                focusedLabelColor = MaterialTheme.colorScheme.primary,
+                                unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                                cursorColor = MaterialTheme.colorScheme.primary
+                            ),
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("dialog_remark_input"),
+                            leadingIcon = {
+                                Icon(Icons.Default.Notes, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            },
+                            trailingIcon = {
+                                if (remarkField.isNotEmpty()) {
+                                    IconButton(onClick = { remarkField = "" }) {
+                                        Icon(Icons.Default.Clear, contentDescription = "Eingabe löschen", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    }
+                                }
+                            }
+                        )
+
+                        // Quick inputs
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            val addAmount: (Int) -> Unit = { amount ->
+                                val current = stepsField.toIntOrNull() ?: 0
+                                stepsField = (current + amount).toString()
+                            }
+                            Button(
+                                onClick = { addAmount(1000) },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                ),
+                                modifier = Modifier.weight(1f).testTag("quick_add_1k"),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text("+1.000", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            }
+                            Button(
+                                onClick = { addAmount(5000) },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                ),
+                                modifier = Modifier.weight(1f).testTag("quick_add_5k"),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text("+5.000", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            }
+                            Button(
+                                onClick = { addAmount(10000) },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                ),
+                                modifier = Modifier.weight(1f).testTag("quick_add_10k"),
+                                shape = RoundedCornerShape(8.dp)
+                            ) {
+                                Text("+10.000", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            }
+                        }
+
+                        AnimatedVisibility(visible = showErrorMsg.isNotEmpty()) {
+                            Text(
+                                text = showErrorMsg,
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.Medium
                             )
                         }
-                        Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                     }
-                }
 
-                // STEPS COUNT FIELD
-                OutlinedTextField(
-                    value = stepsField,
-                    onValueChange = { input ->
-                        if (input.all { it.isDigit() }) {
-                            stepsField = input
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        TextButton(
+                            onClick = onDismiss,
+                            modifier = Modifier.testTag("dialog_cancel_button")
+                        ) {
+                            Text("Abbrechen", color = MaterialTheme.colorScheme.primary)
                         }
-                    },
-                    label = { Text("Schritte") },
-                    placeholder = { Text("z.B. 10000") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        focusedLabelColor = MaterialTheme.colorScheme.primary,
-                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                        cursorColor = MaterialTheme.colorScheme.primary
-                    ),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("dialog_steps_input"),
-                    leadingIcon = {
-                        Icon(Icons.Default.DirectionsRun, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                    },
-                    trailingIcon = {
-                        if (stepsField.isNotEmpty()) {
-                            IconButton(onClick = { stepsField = "" }) {
-                                  Icon(Icons.Default.Clear, contentDescription = "Eingabe löschen", tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                            }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(
+                            onClick = {
+                                val parsed = stepsField.toIntOrNull()
+                                if (parsed == null || parsed < 0) {
+                                    showErrorMsg = "Bitte gib eine gültige Anzahl an Schritten ein."
+                                } else if (parsed > 1000000) {
+                                    showErrorMsg = "Das ist eine unglaubliche Zahl! Bitte erfasse Schritte unter 1.000.000."
+                                } else {
+                                    onSave(dateStr, parsed, remarkField, chosenPerson)
+                                }
+                            },
+                            modifier = Modifier.testTag("dialog_save_button"),
+                            shape = RoundedCornerShape(12.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        ) {
+                            Text("Speichern")
                         }
                     }
-                )
-
-                // REMARK FIELD
-                OutlinedTextField(
-                    value = remarkField,
-                    onValueChange = { remarkField = it },
-                    label = { Text("Bemerkung") },
-                    placeholder = { Text("z.B. Abendspaziergang") },
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        focusedLabelColor = MaterialTheme.colorScheme.primary,
-                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                        cursorColor = MaterialTheme.colorScheme.primary
-                    ),
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag("dialog_remark_input"),
-                    leadingIcon = {
-                        Icon(Icons.Default.Notes, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                    },
-                    trailingIcon = {
-                        if (remarkField.isNotEmpty()) {
-                            IconButton(onClick = { remarkField = "" }) {
-                                Icon(Icons.Default.Clear, contentDescription = "Eingabe löschen", tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                            }
-                        }
-                    }
-                )
-
-                // Quick inputs
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    val addAmount: (Int) -> Unit = { amount ->
-                        val current = stepsField.toIntOrNull() ?: 0
-                        stepsField = (current + amount).toString()
-                    }
-                    Button(
-                        onClick = { addAmount(1000) },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        ),
-                        modifier = Modifier.weight(1f).testTag("quick_add_1k"),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text("+1.000", fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Button(
-                        onClick = { addAmount(5000) },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        ),
-                        modifier = Modifier.weight(1f).testTag("quick_add_5k"),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text("+5.000", fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                    }
-                    Button(
-                        onClick = { addAmount(10000) },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        ),
-                        modifier = Modifier.weight(1f).testTag("quick_add_10k"),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text("+10.000", fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                    }
                 }
-
-                AnimatedVisibility(visible = showErrorMsg.isNotEmpty()) {
-                    Text(
-                        text = showErrorMsg,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            Button(
-                onClick = {
-                    val parsed = stepsField.toIntOrNull()
-                    if (parsed == null || parsed < 0) {
-                        showErrorMsg = "Bitte gib eine gültige Anzahl an Schritten ein."
-                    } else if (parsed > 1000000) {
-                        showErrorMsg = "Das ist eine unglaubliche Zahl! Bitte erfasse Schritte unter 1.000.000."
-                    } else {
-                        onSave(dateStr, parsed, remarkField, chosenPerson)
-                    }
-                },
-                modifier = Modifier.testTag("dialog_save_button"),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            ) {
-                Text("Speichern")
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = onDismiss,
-                modifier = Modifier.testTag("dialog_cancel_button")
-            ) {
-                Text("Abbrechen", color = MaterialTheme.colorScheme.primary)
             }
         }
-    )
+    }
 
     if (showComposeDatePicker) {
         val initialMs = remember(dateStr) {
