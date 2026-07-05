@@ -7,6 +7,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.example.MainActivity
 import com.example.R
@@ -24,6 +25,20 @@ class AlarmReceiver : BroadcastReceiver() {
         }
 
         val isRetry = intent.getBooleanExtra("is_retry", false)
+        val scheduledTime = intent.getLongExtra("scheduled_time", 0L)
+        val currentTime = System.currentTimeMillis()
+
+        // Check if the alarm was significantly delayed/deferred by the OS (e.g., more than 5 minutes late).
+        // This commonly happens when the app was closed or suspended, and launching the app triggers the deferred intent.
+        // We do NOT want to show the notification when the app is opened late; we only show it if triggered on time.
+        if (scheduledTime > 0L && (currentTime - scheduledTime) > 5 * 60 * 1000) {
+            Log.w("AlarmReceiver", "Alarm was deferred/delayed by the OS (scheduled: $scheduledTime, current: $currentTime). Skipping notification display.")
+            // Reschedule daily alarm for the next day if this is the normal daily alarm, so the cycle continues
+            if (!isRetry) {
+                AlarmHelper.scheduleAlarm(context, preferencesManager.alarmHour, preferencesManager.alarmMinute)
+            }
+            return
+        }
 
         // Reschedule daily alarm for the next day ONLY if it is the normal daily alarm
         if (!isRetry) {

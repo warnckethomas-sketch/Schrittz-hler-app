@@ -14,14 +14,6 @@ object AlarmHelper {
 
     fun scheduleAlarm(context: Context, hour: Int, minute: Int) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
-        val intent = Intent(context, AlarmReceiver::class.java)
-        
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            ALARM_REQ_CODE,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
 
         val calendar = Calendar.getInstance().apply {
             set(Calendar.HOUR_OF_DAY, hour)
@@ -35,6 +27,17 @@ object AlarmHelper {
             }
         }
 
+        val intent = Intent(context, AlarmReceiver::class.java).apply {
+            putExtra("scheduled_time", calendar.timeInMillis)
+        }
+        
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            ALARM_REQ_CODE,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         val canScheduleExact = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             alarmManager.canScheduleExactAlarms()
         } else {
@@ -42,12 +45,23 @@ object AlarmHelper {
         }
 
         try {
-            if (canScheduleExact && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    calendar.timeInMillis,
-                    pendingIntent
-                )
+            if (canScheduleExact) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    val alarmClockInfo = AlarmManager.AlarmClockInfo(calendar.timeInMillis, pendingIntent)
+                    alarmManager.setAlarmClock(alarmClockInfo, pendingIntent)
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        calendar.timeInMillis,
+                        pendingIntent
+                    )
+                } else {
+                    alarmManager.setExact(
+                        AlarmManager.RTC_WAKEUP,
+                        calendar.timeInMillis,
+                        pendingIntent
+                    )
+                }
             } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 alarmManager.setAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
@@ -55,7 +69,7 @@ object AlarmHelper {
                     pendingIntent
                 )
             } else {
-                alarmManager.setExact(
+                alarmManager.set(
                     AlarmManager.RTC_WAKEUP,
                     calendar.timeInMillis,
                     pendingIntent
@@ -83,8 +97,13 @@ object AlarmHelper {
 
     fun scheduleRetryAlarm(context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
+        
+        // 10 minutes in milliseconds
+        val triggerTime = System.currentTimeMillis() + 10 * 60 * 1000
+
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             putExtra("is_retry", true)
+            putExtra("scheduled_time", triggerTime)
         }
         val pendingIntent = PendingIntent.getBroadcast(
             context,
@@ -92,8 +111,6 @@ object AlarmHelper {
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        // 10 minutes in milliseconds
-        val triggerTime = System.currentTimeMillis() + 10 * 60 * 1000
 
         val canScheduleExact = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             alarmManager.canScheduleExactAlarms()
