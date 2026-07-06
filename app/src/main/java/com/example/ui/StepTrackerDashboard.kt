@@ -51,6 +51,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.Image
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -140,10 +141,12 @@ fun StepTrackerDashboard(
     LaunchedEffect(activeTab, showStepLengthConfig) {
         if (activeTab == 0 && !showStepLengthConfig) {
             visibleMonthsLimit = 1
-            try {
-                listState.animateScrollToItem(0)
-            } catch (e: Exception) {
-                // ignore
+            if (listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 0) {
+                try {
+                    listState.animateScrollToItem(0)
+                } catch (e: Exception) {
+                    // ignore
+                }
             }
         }
     }
@@ -221,37 +224,48 @@ fun StepTrackerDashboard(
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.75f)
+                            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.70f)
                         ),
                         shape = RoundedCornerShape(14.dp)
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally)
-                        ) {
-                            Text(
-                                text = if (showStepLengthConfig) "Einstellungen" else if (activeTab == 0) "Erfassung" else "Historie",
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 24.sp,
-                                letterSpacing = (-0.5).sp,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Icon(
-                                imageVector = if (showStepLengthConfig) Icons.Default.Settings else if (activeTab == 0) Icons.Default.DirectionsRun else Icons.Default.History,
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            Image(
+                                painter = painterResource(id = com.example.R.drawable.header_bg),
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(24.dp)
+                                contentScale = ContentScale.FillBounds,
+                                modifier = Modifier.matchParentSize(),
+                                alpha = 0.22f
                             )
-                            Text(
-                                text = if (showStepLengthConfig) "Konfiguration & Sicherung" else if (activeTab == 0) "Erfassung & Auswertung" else "Verlauf & Sicherung",
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontWeight = FontWeight.SemiBold,
-                                textAlign = TextAlign.Center
-                            )
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = "Schrittzähler",
+                                    fontWeight = FontWeight.ExtraBold,
+                                    fontSize = 24.sp,
+                                    letterSpacing = (-0.5).sp,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    textAlign = TextAlign.Center
+                                )
+                                Text(
+                                    text = if (showStepLengthConfig) "Konfiguration & Sicherung" else if (activeTab == 0) "Erfassung & Auswertung" else "Verlauf & Sicherung",
+                                    fontSize = 14.sp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontWeight = FontWeight.SemiBold,
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Icon(
+                                    imageVector = if (showStepLengthConfig) Icons.Default.Settings else if (activeTab == 0) Icons.Default.DirectionsRun else Icons.Default.History,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
                         }
                     }
 
