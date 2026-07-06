@@ -404,6 +404,99 @@ fun StepTrackerDashboard(
                                 color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
                             )
 
+                            val isDashboardActive = activeTab == 0 && !showStepLengthConfig
+                            DropdownMenuItem(
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Home,
+                                        contentDescription = null,
+                                        tint = if (isDashboardActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                },
+                                text = {
+                                    Text(
+                                        text = "Dashboard",
+                                        fontWeight = if (isDashboardActive) FontWeight.Bold else FontWeight.Normal,
+                                        color = if (isDashboardActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                    )
+                                },
+                                onClick = {
+                                    activeTab = 0
+                                    showStepLengthConfig = false
+                                    showTopMenu = false
+                                    coroutineScope.launch {
+                                        try {
+                                            listState.animateScrollToItem(0)
+                                        } catch (e: Exception) {}
+                                    }
+                                },
+                                modifier = Modifier.testTag("dropdown_menu_dashboard")
+                            )
+
+                            val isHistoryActive = activeTab == 1 && !showStepLengthConfig
+                            DropdownMenuItem(
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.History,
+                                        contentDescription = null,
+                                        tint = if (isHistoryActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                },
+                                text = {
+                                    Text(
+                                        text = "Historie",
+                                        fontWeight = if (isHistoryActive) FontWeight.Bold else FontWeight.Normal,
+                                        color = if (isHistoryActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                    )
+                                },
+                                onClick = {
+                                    activeTab = 1
+                                    showStepLengthConfig = false
+                                    showTopMenu = false
+                                    coroutineScope.launch {
+                                        try {
+                                            listState.animateScrollToItem(0)
+                                        } catch (e: Exception) {}
+                                    }
+                                },
+                                modifier = Modifier.testTag("dropdown_menu_history")
+                            )
+
+                            DropdownMenuItem(
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Default.Settings,
+                                        contentDescription = null,
+                                        tint = if (showStepLengthConfig) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                },
+                                text = {
+                                    Text(
+                                        text = "Einstellungen",
+                                        fontWeight = if (showStepLengthConfig) FontWeight.Bold else FontWeight.Normal,
+                                        color = if (showStepLengthConfig) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                    )
+                                },
+                                onClick = {
+                                    showStepLengthConfig = !showStepLengthConfig
+                                    showTopMenu = false
+                                    if (showStepLengthConfig) {
+                                        coroutineScope.launch {
+                                            listState.animateScrollToItem(0)
+                                        }
+                                    }
+                                },
+                                modifier = Modifier.testTag("dropdown_menu_settings")
+                            )
+
+                            HorizontalDivider(
+                                modifier = Modifier.padding(vertical = 4.dp),
+                                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                            )
+
                             DropdownMenuItem(
                                 leadingIcon = {
                                     Icon(
@@ -424,34 +517,6 @@ fun StepTrackerDashboard(
                                     showTopMenu = false
                                 },
                                 modifier = Modifier.testTag("dropdown_menu_print")
-                            )
-
-                            DropdownMenuItem(
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = Icons.Default.Settings,
-                                        contentDescription = null,
-                                        tint = if (showStepLengthConfig) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                },
-                                text = {
-                                    Text(
-                                        text = if (showStepLengthConfig) "Zurück zum Dashboard" else "Einstellungen",
-                                        fontWeight = if (showStepLengthConfig) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (showStepLengthConfig) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                                    )
-                                },
-                                onClick = {
-                                    showStepLengthConfig = !showStepLengthConfig
-                                    showTopMenu = false
-                                    if (showStepLengthConfig) {
-                                        coroutineScope.launch {
-                                            listState.animateScrollToItem(0)
-                                        }
-                                    }
-                                },
-                                modifier = Modifier.testTag("dropdown_menu_settings")
                             )
 
                             HorizontalDivider(
@@ -495,83 +560,33 @@ fun StepTrackerDashboard(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.85f))
                     .navigationBarsPadding()
             ) {
                 HorizontalDivider(
                     thickness = 1.dp,
                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.45f)
                 )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val isDashboardActive = activeTab == 0 && !showStepLengthConfig
-                    IconButton(
-                        onClick = {
-                            activeTab = 0
-                            showStepLengthConfig = false
-                            coroutineScope.launch {
-                                try {
-                                    listState.animateScrollToItem(0)
-                                } catch (e: Exception) {}
-                            }
-                        },
-                        modifier = Modifier
-                            .size(52.dp)
-                            .clip(CircleShape)
-                            .background(if (isDashboardActive) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Home,
-                            contentDescription = "Dashboard",
-                            tint = if (isDashboardActive) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
-                            modifier = Modifier.size(26.dp)
-                        )
-                    }
-
-                    FloatingActionButton(
-                        onClick = {
-                            dialogInitialDate = DateUtils.getTodayString()
-                            dialogInitialSteps = ""
-                            showAddDialog = true
-                        },
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                        shape = CircleShape,
-                        modifier = Modifier
-                            .size(56.dp)
-                            .testTag("bottom_manual_add_steps_button")
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Schritte erfassen",
-                            modifier = Modifier.size(28.dp)
-                        )
-                    }
-
-                    val isHistoryActive = activeTab == 1 && !showStepLengthConfig
-                    IconButton(
-                        onClick = {
-                            activeTab = 1
-                            showStepLengthConfig = false
-                        },
-                        modifier = Modifier
-                            .size(52.dp)
-                            .clip(CircleShape)
-                            .background(if (isHistoryActive) MaterialTheme.colorScheme.primaryContainer else Color.Transparent)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.History,
-                            contentDescription = "Historie",
-                            tint = if (isHistoryActive) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
-                            modifier = Modifier.size(26.dp)
-                        )
-                    }
-                }
+            }
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    dialogInitialDate = DateUtils.getTodayString()
+                    dialogInitialSteps = ""
+                    showAddDialog = true
+                },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary,
+                shape = CircleShape,
+                modifier = Modifier
+                    .size(56.dp)
+                    .testTag("bottom_manual_add_steps_button")
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Schritte erfassen",
+                    modifier = Modifier.size(28.dp)
+                )
             }
         }
     ) { innerPadding ->
