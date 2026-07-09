@@ -13,10 +13,16 @@ class StepRepository(
     suspend fun insertOrUpdate(date: String, steps: Int, remark: String = "") {
         stepDao.insertOrUpdate(StepEntry(date = date, steps = steps, remark = remark))
         
-        // If the entry being added/updated is for today, cancel the 10-minute retry alarm
+        // If the entry being added/updated is for today, cancel the 10-minute retry alarm only if both have steps
         val todayStr = com.example.ui.DateUtils.getTodayString()
         if (date == todayStr || date == "person_2|$todayStr") {
-            AlarmHelper.cancelRetryAlarm(context)
+            val p1Entry = stepDao.getEntryByDate(todayStr)
+            val p2Entry = stepDao.getEntryByDate("person_2|$todayStr")
+            val p1Done = p1Entry != null && p1Entry.steps > 0
+            val p2Done = p2Entry != null && p2Entry.steps > 0
+            if (p1Done && p2Done) {
+                AlarmHelper.cancelRetryAlarm(context)
+            }
         }
     }
 
