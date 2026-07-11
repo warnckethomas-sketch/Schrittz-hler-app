@@ -15,7 +15,20 @@ import com.example.ui.DateUtils
 import kotlinx.coroutines.runBlocking
 
 class AlarmReceiver : BroadcastReceiver() {
+    companion object {
+        const val ACTION_CONFIRM = "com.example.action.CONFIRM_ALARM"
+    }
+
     override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action == ACTION_CONFIRM) {
+            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.cancel(1002) // Dismiss the notification
+            
+            // Do NOT cancel the retry alarm!
+            Log.d("AlarmReceiver", "Notification confirmed/dismissed via action button/swipe. Keeping 10-minute retry alarm active.")
+            return
+        }
+
         val preferencesManager = PreferencesManager(context)
         
         // If alarm is disabled, do nothing
@@ -113,6 +126,16 @@ class AlarmReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        val confirmIntent = Intent(context, AlarmReceiver::class.java).apply {
+            action = ACTION_CONFIRM
+        }
+        val confirmPendingIntent = PendingIntent.getBroadcast(
+            context,
+            1003,
+            confirmIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         // Try to use app icon or default system drawable if not ready
         val builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
@@ -121,6 +144,12 @@ class AlarmReceiver : BroadcastReceiver() {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .setContentIntent(openPendingIntent)
+            .setDeleteIntent(confirmPendingIntent) // If they swipe/dismiss, it fires ACTION_CONFIRM
+            .addAction(
+                0,
+                "Bestätigen",
+                confirmPendingIntent
+            )
             .setStyle(NotificationCompat.BigTextStyle().bigText(message))
 
         notificationManager.notify(1002, builder.build())
