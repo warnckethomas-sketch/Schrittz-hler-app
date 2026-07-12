@@ -9,6 +9,8 @@ import android.content.Intent
 import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import android.media.RingtoneManager
+import android.media.AudioAttributes
 import com.example.MainActivity
 import com.example.R
 import com.example.ui.DateUtils
@@ -103,8 +105,10 @@ class AlarmReceiver : BroadcastReceiver() {
     }
 
     private fun triggerNotification(context: Context, title: String, message: String) {
-        val channelId = "step_tracker_alarm_channel"
+        val channelId = "step_tracker_alarm_channel_v4"
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        val soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = "Schrittzähler Erinnerung"
@@ -112,6 +116,15 @@ class AlarmReceiver : BroadcastReceiver() {
             val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel(channelId, name, importance).apply {
                 description = descriptionText
+                enableLights(true)
+                lightColor = android.graphics.Color.RED
+                enableVibration(true)
+                vibrationPattern = longArrayOf(100, 200, 300, 400, 500, 400, 300, 200, 400)
+                setSound(soundUri, AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+                )
             }
             notificationManager.createNotificationChannel(channel)
         }
@@ -142,6 +155,10 @@ class AlarmReceiver : BroadcastReceiver() {
             .setContentTitle(title)
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setSound(soundUri)
+            .setVibrate(longArrayOf(100, 200, 300, 400, 500))
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
             .setAutoCancel(true)
             .setContentIntent(openPendingIntent)
             .setDeleteIntent(confirmPendingIntent) // If they swipe/dismiss, it fires ACTION_CONFIRM
