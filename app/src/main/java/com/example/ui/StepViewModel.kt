@@ -65,6 +65,10 @@ data class DayStepData(
 
 class StepViewModel(private val repository: StepRepository) : ViewModel() {
 
+    init {
+        repository.saveSelectedPerson("person_1")
+    }
+
     private val _isBackupRestoreLoading = MutableStateFlow(false)
     val isBackupRestoreLoading: StateFlow<Boolean> = _isBackupRestoreLoading.asStateFlow()
 
@@ -445,7 +449,7 @@ class StepViewModel(private val repository: StepRepository) : ViewModel() {
         return true
     }
 
-    private val _selectedPerson = MutableStateFlow(repository.getSelectedPerson())
+    private val _selectedPerson = MutableStateFlow("person_1")
     val selectedPerson: StateFlow<String> = _selectedPerson.asStateFlow()
 
     private val _person1Name = MutableStateFlow(repository.getPerson1Name())
